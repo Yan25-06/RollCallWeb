@@ -1,0 +1,13 @@
+{
+  "name": "Anh Ngữ Ms.Phương",
+  "short_name": "Anh Ngữ Ms.Phương",
+  "description": "Hệ thống điểm danh và quản lý học phí",
+  "theme_color": "#0F2044",
+  "background_color": "#F5F8FC",
+  "display": "standalone",
+  "start_url": "/",
+  "icons": [
+    { "src": "/icon-192.png", "sizes": "192x192", "type": "image/png" },
+    { "src": "/icon-512.png", "sizes": "512x512", "type": "image/png" }
+  ]
+}

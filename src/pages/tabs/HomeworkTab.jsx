@@ -1,6 +1,6 @@
-import { useState, useEffect, useRef } from 'react'
+import { useState, useEffect, useRef, useMemo } from 'react'
 import { clsx } from 'clsx'
-import { FileText, Plus, ArrowLeft, ClipboardList, Calendar } from 'lucide-react'
+import { FileText, Plus, ArrowLeft, ClipboardList, Calendar, Pencil } from 'lucide-react'
 import { Button, Card, Badge, toast } from '@/components/ui'
 import { SessionSelector } from '@/components/SessionSelector'
 import { SessionModal } from '@/components/SessionModal'
@@ -12,9 +12,9 @@ import { HomeworkAssignmentModal } from '@/components/homework/HomeworkAssignmen
 import { SubmissionTable } from '@/components/homework/SubmissionTable'
 import {
   getSessionsByClass, getStudents, getEnrollmentsByClass,
-  getHomeworkBySession, updateHomework, updateSessionHomeworkTitle, saveHomeworks, getHomeworks, getHomeworkStats,
-  getHwAssignmentsByClass, createHwAssignment, deleteHwAssignment,
-  getSubmissionsByAssignment, getActiveStudents,
+  getHomeworkBySession, updateHomework, updateSessionHomeworkTitle, saveHomeworks, getHomeworks,
+  getHwAssignmentsByClass, createHwAssignment, updateHwAssignment, deleteHwAssignment,
+  getSubmissionsByAssignment, getSubmissions, getActiveStudents,
   uid
 } from '@/store/db'
 import { getInitials, fmtDate } from '@/utils/helpers'
@@ -111,13 +111,28 @@ export const HomeworkTab = ({ classId }) => {
     setRecords(getHomeworkBySession(activeSessionId))
   }
 
-  if (mode === MODE.ASSIGN) {
-    return <AssignView classId={classId} onBack={() => setMode(MODE.SESSION)} />
-  }
+  // Pre-compute homework stats for ALL students in one pass
+  // (avoids N×2 localStorage reads from calling getHomeworkStats per row)
+  const hwStatsMap = useMemo(() => {
+    if (students.length === 0) return {}
+    const classSessionIds = new Set(sessions.map(s => s.id))
+    // Single read of all homework records for this class's sessions
+    const classHomeworks = getHomeworks().filter(h => classSessionIds.has(h.sessionId))
+    return Object.fromEntries(students.map(student => {
+      const studentHws = classHomeworks.filter(h => h.studentId === student.id)
+      const stats = { done: 0, inProgress: 0, notDone: 0, total: studentHws.length }
+      studentHws.forEach(r => {
+        if (r.progress === 'done' || r.progress === 100) stats.done++
+        else if (r.progress === 'in_progress' || r.progress === 50) stats.inProgress++
+        else stats.notDone++
+      })
+      return [student.id, stats]
+    }))
+  }, [students, sessions, records]) // `records` dep triggers recompute after any progress update
 
   return (
     <div className="flex flex-col gap-6 relative h-full min-h-[500px]">
-      {/* Mode toggle */}
+      {/* Mode toggle — always visible */}
       <div className="flex gap-2">
         <button
           onClick={() => setMode(MODE.SESSION)}
@@ -135,164 +150,180 @@ export const HomeworkTab = ({ classId }) => {
         </button>
       </div>
 
-      {/* Toolbar */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-white p-4 rounded-2xl border border-navy-100 shadow-navy-sm">
-        <SessionSelector
-          sessions={sessions}
-          activeSessionId={activeSessionId}
-          onSelect={setActiveSessionId}
-          onAddNew={() => setSessionModalOpen(true)}
-        />
-        
-        {activeSessionId && (
-          <div className="flex-1 max-w-sm">
-            <input
-              type="text"
-              placeholder="Tên bài tập hôm nay..."
-              className="input text-sm w-full"
-              value={sharedTitle}
-              onChange={(e) => handleTitleChange(e.target.value)}
+      {/* Session mode content */}
+      {mode === MODE.SESSION && (
+        <>
+          {/* Toolbar */}
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-white p-4 rounded-2xl border border-navy-100 shadow-navy-sm">
+            <SessionSelector
+              sessions={sessions}
+              activeSessionId={activeSessionId}
+              onSelect={setActiveSessionId}
+              onAddNew={() => setSessionModalOpen(true)}
             />
+            
+            {activeSessionId && (
+              <div className="flex-1 max-w-sm">
+                <input
+                  type="text"
+                  placeholder="Tên bài tập hôm nay..."
+                  className="input text-sm w-full"
+                  value={sharedTitle}
+                  onChange={(e) => handleTitleChange(e.target.value)}
+                />
+              </div>
+            )}
           </div>
-        )}
-      </div>
 
-      {/* Main Content */}
-      {!activeSessionId ? (
-        <Card className="p-16 flex flex-col items-center justify-center text-center gap-3">
-          <FileText size={48} className="text-navy-200" />
-          <p className="font-semibold text-navy-700">Chưa có buổi học nào</p>
-          <p className="text-sm text-navy-400">Tạo buổi đầu tiên ở tab Điểm Danh hoặc thêm tại đây</p>
-          <Button onClick={() => setSessionModalOpen(true)} className="mt-2">
-            + Tạo buổi học
-          </Button>
-        </Card>
-      ) : students.length === 0 ? (
-        <Card className="p-16 flex flex-col items-center justify-center text-center gap-3">
-          <FileText size={48} className="text-navy-200" />
-          <p className="font-semibold text-navy-700">Không có học viên nào</p>
-          <p className="text-sm text-navy-400">Thêm học viên vào lớp để giao bài tập</p>
-        </Card>
-      ) : (
-        <div className="bg-white rounded-2xl border border-navy-100 shadow-navy-sm overflow-hidden flex flex-col flex-1">
-          <div className="overflow-x-auto flex-1">
-            <table className="w-full text-left text-sm whitespace-nowrap table-fixed">
-              <thead className="sticky top-0 bg-white z-10">
-                <tr className="bg-navy-50/50 border-b border-navy-100">
-                  <th className="px-6 py-4 font-semibold text-navy-800 w-1/4">Học viên</th>
-                  <th className="px-6 py-4 font-semibold text-navy-800 w-1/4 text-center">Hiệu suất</th>
-                  <th className="px-6 py-4 font-semibold text-navy-800 w-1/4 text-center">Kết quả bài tập</th>
-                  <th className="px-6 py-4 font-semibold text-navy-800 w-1/4">Ghi chú</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-navy-50">
-                {students.map(student => {
-                  const enroll = enrollments.find(e => e.studentId === student.id)
-                  const isPaused = enroll?.status === 'paused'
-                  const record = records.find(r => r.studentId === student.id)
-                  const hwStats = getHomeworkStats(student.id, classId)
-                  const hwRate = hwStats.total > 0 ? Math.round((hwStats.done * 100 + hwStats.inProgress * 50) / hwStats.total) : 0
-
-                  return (
-                    <tr 
-                      key={student.id} 
-                      className={clsx(
-                        "transition-colors hover:bg-navy-50/30",
-                        isPaused && "opacity-50 bg-gray-50/50 hover:bg-gray-50/50"
-                      )}
-                    >
-                      <td className="px-6 py-3">
-                        <button 
-                          className="flex items-center gap-3 text-left w-full group"
-                          onClick={() => setSelectedStudent(student)}
-                        >
-                          <div className="w-9 h-9 rounded-full bg-navy-800 text-white text-xs font-bold flex items-center justify-center shrink-0">
-                            {getInitials(student.name)}
-                          </div>
-                          <div>
-                            <p className="font-medium text-navy-900 group-hover:text-navy-600 transition-colors">
-                              {student.name}
-                            </p>
-                            {isPaused && <p className="text-xs text-amber-600 font-medium mt-0.5">Tạm ngưng</p>}
-                          </div>
-                        </button>
-                      </td>
-                      <td className="px-6 py-3 text-center">
-                        <span className={clsx(
-                          "text-sm font-semibold",
-                          isPaused ? "text-navy-300" : hwRate >= 80 ? "text-emerald-600" : hwRate >= 50 ? "text-amber-600" : "text-red-600"
-                        )}>
-                          {hwStats.total > 0 ? `${hwRate}%` : '—'}
-                        </span>
-                      </td>
-                      <td className="px-6 py-3 text-center">
-                        {record ? (
-                          <ProgressBadge
-                            progress={record.progress}
-                            disabled={isPaused}
-                            onChange={(val) => handleProgressChange(record.id, val)}
-                          />
-                        ) : (
-                          <Button 
-                            variant="ghost" 
-                            size="sm" 
-                            className="text-xs text-navy-500"
-                            onClick={() => handleAddMissingRecord(student.id)}
-                          >
-                            <Plus size={14} className="mr-1" /> Thêm
-                          </Button>
-                        )}
-                      </td>
-                      <td className="px-6 py-3">
-                        {record ? (
-                          <HomeworkNoteCell
-                            note={record.note}
-                            disabled={isPaused}
-                            onSave={(note) => handleNoteChange(record.id, note)}
-                          />
-                        ) : (
-                          <span className="text-xs text-navy-300 italic">—</span>
-                        )}
-                      </td>
+          {/* Main Content */}
+          {!activeSessionId ? (
+            <Card className="p-16 flex flex-col items-center justify-center text-center gap-3">
+              <FileText size={48} className="text-navy-200" />
+              <p className="font-semibold text-navy-700">Chưa có buổi học nào</p>
+              <p className="text-sm text-navy-400">Tạo buổi đầu tiên ở tab Điểm Danh hoặc thêm tại đây</p>
+              <Button onClick={() => setSessionModalOpen(true)} className="mt-2">
+                + Tạo buổi học
+              </Button>
+            </Card>
+          ) : students.length === 0 ? (
+            <Card className="p-16 flex flex-col items-center justify-center text-center gap-3">
+              <FileText size={48} className="text-navy-200" />
+              <p className="font-semibold text-navy-700">Không có học viên nào</p>
+              <p className="text-sm text-navy-400">Thêm học viên vào lớp để giao bài tập</p>
+            </Card>
+          ) : (
+            <div className="bg-white rounded-2xl border border-navy-100 shadow-navy-sm overflow-hidden flex flex-col flex-1">
+              <div className="overflow-x-auto flex-1">
+                <table className="w-full text-left text-sm whitespace-nowrap table-fixed">
+                  <thead className="sticky top-0 bg-white z-10">
+                    <tr className="bg-navy-50/50 border-b border-navy-100">
+                      <th className="px-6 py-4 font-semibold text-navy-800 w-1/4">Học viên</th>
+                      <th className="px-6 py-4 font-semibold text-navy-800 w-1/4 text-center">Hiệu suất</th>
+                      <th className="px-6 py-4 font-semibold text-navy-800 w-1/4 text-center">Kết quả bài tập</th>
+                      <th className="px-6 py-4 font-semibold text-navy-800 w-1/4">Ghi chú</th>
                     </tr>
-                  )
-                })}
-              </tbody>
-            </table>
-          </div>
-          
-          <HomeworkSummaryFooter records={records.filter(r => enrollments.find(e => e.studentId === r.studentId)?.status !== 'paused')} />
-        </div>
+                  </thead>
+                  <tbody className="divide-y divide-navy-50">
+                    {students.map(student => {
+                      const enroll = enrollments.find(e => e.studentId === student.id)
+                      const isPaused = enroll?.status === 'paused'
+                      const record = records.find(r => r.studentId === student.id)
+                      const hwStats = hwStatsMap[student.id] ?? { done: 0, inProgress: 0, notDone: 0, total: 0 }
+                      const hwRate = hwStats.total > 0 ? Math.round((hwStats.done * 100 + hwStats.inProgress * 50) / hwStats.total) : 0
+
+                      return (
+                        <tr 
+                          key={student.id} 
+                          className={clsx(
+                            "transition-colors hover:bg-navy-50/30",
+                            isPaused && "opacity-50 bg-gray-50/50 hover:bg-gray-50/50"
+                          )}
+                        >
+                          <td className="px-6 py-3">
+                            <button 
+                              className="flex items-center gap-3 text-left w-full group"
+                              onClick={() => setSelectedStudent(student)}
+                            >
+                              <div className="w-9 h-9 rounded-full bg-navy-800 text-white text-xs font-bold flex items-center justify-center shrink-0">
+                                {getInitials(student.name)}
+                              </div>
+                              <div>
+                                <p className="font-medium text-navy-900 group-hover:text-navy-600 transition-colors">
+                                  {student.name}
+                                </p>
+                                {isPaused && <p className="text-xs text-amber-600 font-medium mt-0.5">Tạm ngưng</p>}
+                              </div>
+                            </button>
+                          </td>
+                          <td className="px-6 py-3 text-center">
+                            <span className={clsx(
+                              "text-sm font-semibold",
+                              isPaused ? "text-navy-300" : hwRate >= 80 ? "text-emerald-600" : hwRate >= 50 ? "text-amber-600" : "text-red-600"
+                            )}>
+                              {hwStats.total > 0 ? `${hwRate}%` : '—'}
+                            </span>
+                          </td>
+                          <td className="px-6 py-3 text-center">
+                            {record ? (
+                              <ProgressBadge
+                                progress={record.progress}
+                                disabled={isPaused}
+                                onChange={(val) => handleProgressChange(record.id, val)}
+                              />
+                            ) : (
+                              <Button 
+                                variant="ghost" 
+                                size="sm" 
+                                className="text-xs text-navy-500"
+                                onClick={() => handleAddMissingRecord(student.id)}
+                              >
+                                <Plus size={14} className="mr-1" /> Thêm
+                              </Button>
+                            )}
+                          </td>
+                          <td className="px-6 py-3">
+                            {record ? (
+                              <HomeworkNoteCell
+                                note={record.note}
+                                disabled={isPaused}
+                                onSave={(note) => handleNoteChange(record.id, note)}
+                              />
+                            ) : (
+                              <span className="text-xs text-navy-300 italic">—</span>
+                            )}
+                          </td>
+                        </tr>
+                      )
+                    })}
+                  </tbody>
+                </table>
+              </div>
+              
+              <HomeworkSummaryFooter records={records.filter(r => enrollments.find(e => e.studentId === r.studentId)?.status !== 'paused')} />
+            </div>
+          )}
+
+          <SessionModal
+            open={sessionModalOpen}
+            onClose={() => setSessionModalOpen(false)}
+            classId={classId}
+            onSaved={handleSessionSaved}
+          />
+
+          {selectedStudent && (
+            <StudentHomeworkPanel
+              student={selectedStudent}
+              classId={classId}
+              onClose={() => setSelectedStudent(null)}
+            />
+          )}
+        </>
       )}
 
-      <SessionModal
-        open={sessionModalOpen}
-        onClose={() => setSessionModalOpen(false)}
-        classId={classId}
-        onSaved={handleSessionSaved}
-      />
-
-      {selectedStudent && (
-        <StudentHomeworkPanel
-          student={selectedStudent}
-          classId={classId}
-          onClose={() => setSelectedStudent(null)}
-        />
+      {/* Assign mode content */}
+      {mode === MODE.ASSIGN && (
+        <AssignView classId={classId} />
       )}
     </div>
   )
 }
 
 // ─── Bài Giao view ─────────────────────────────────────────
-const AssignView = ({ classId, onBack }) => {
+const AssignView = ({ classId }) => {
   const [assignments, setAssignments] = useState([])
   const [selected, setSelected] = useState(null)
   const [submissions, setSubmissions] = useState([])
+  const [allSubs, setAllSubs] = useState([])  // pre-fetched for all assignments (avoids N reads in list)
   const [students, setStudents] = useState([])
   const [modalOpen, setModalOpen] = useState(false)
+  const [editingAssignment, setEditingAssignment] = useState(null)
 
   const refresh = () => {
-    setAssignments(getHwAssignmentsByClass(classId))
+    const as = getHwAssignmentsByClass(classId)
+    setAssignments(as)
+    // Load all submissions in one shot, filter to this class's assignments
+    const assignmentIds = new Set(as.map(a => a.id))
+    setAllSubs(getSubmissions().filter(s => assignmentIds.has(s.hwAssignmentId)))
     setStudents(getActiveStudents(classId))
   }
 
@@ -310,6 +341,13 @@ const AssignView = ({ classId, onBack }) => {
     setModalOpen(false)
   }
 
+  const handleEditSave = (data) => {
+    updateHwAssignment(editingAssignment.id, data)
+    toast.success('Đã cập nhật bài tập!')
+    refresh()
+    setEditingAssignment(null)
+  }
+
   const handleDelete = (id) => {
     if (!confirm('Xóa bài tập này? Tất cả dữ liệu nộp bài sẽ bị xóa.')) return
     deleteHwAssignment(id)
@@ -320,6 +358,9 @@ const AssignView = ({ classId, onBack }) => {
 
   const refreshSubmissions = () => {
     if (selected) setSubmissions(getSubmissionsByAssignment(selected.id))
+    // Also sync allSubs so the list view submission counts stay fresh
+    const assignmentIds = new Set(assignments.map(a => a.id))
+    setAllSubs(getSubmissions().filter(s => assignmentIds.has(s.hwAssignmentId)))
   }
 
   const submittedCount = submissions.filter(s => s.submitted).length
@@ -333,30 +374,32 @@ const AssignView = ({ classId, onBack }) => {
 
   return (
     <div className="flex flex-col gap-4 animate-fade-in">
-      {/* Back + header */}
-      <div className="flex items-center justify-between gap-4">
-        <div className="flex items-center gap-2">
-          <button
-            onClick={onBack}
-            className="p-1.5 rounded-lg text-navy-400 hover:text-navy-700 hover:bg-navy-50 transition-colors"
-          >
-            <ArrowLeft size={16} />
-          </button>
-          <h3 className="font-semibold text-navy-800">
-            {selected ? selected.title : 'Bài Giao'}
-          </h3>
-        </div>
-        {!selected && (
-          <Button size="sm" onClick={() => setModalOpen(true)}>
-            <Plus size={14} className="mr-1" /> Thêm bài tập
-          </Button>
-        )}
-        {selected && (
+      {/* Header: only show when a specific assignment is selected (internal navigation) */}
+      {selected && (
+        <div className="flex items-center justify-between gap-4">
+          <div className="flex items-center gap-2">
+            <button
+              onClick={() => setSelected(null)}
+              className="p-1.5 rounded-lg text-navy-400 hover:text-navy-700 hover:bg-navy-50 transition-colors"
+            >
+              <ArrowLeft size={16} />
+            </button>
+            <h3 className="font-semibold text-navy-800">{selected.title}</h3>
+          </div>
           <Button size="sm" variant="secondary" onClick={() => setSelected(null)}>
             <ArrowLeft size={14} className="mr-1" /> Danh sách
           </Button>
-        )}
-      </div>
+        </div>
+      )}
+
+      {/* Thêm bài tập button (only in list view) */}
+      {!selected && (
+        <div className="flex justify-end">
+          <Button size="sm" onClick={() => setModalOpen(true)}>
+            <Plus size={14} className="mr-1" /> Thêm bài tập
+          </Button>
+        </div>
+      )}
 
       {/* View A: list */}
       {!selected && (
@@ -380,8 +423,8 @@ const AssignView = ({ classId, onBack }) => {
               </thead>
               <tbody className="divide-y divide-navy-50">
                 {assignments.map(a => {
-                  const subs = getSubmissionsByAssignment(a.id)
-                  const cnt = subs.filter(s => s.submitted).length
+                  // Use pre-fetched allSubs instead of per-assignment localStorage read
+                  const cnt = allSubs.filter(s => s.hwAssignmentId === a.id && s.submitted).length
                   return (
                     <tr
                       key={a.id}
@@ -405,12 +448,22 @@ const AssignView = ({ classId, onBack }) => {
                         </Badge>
                       </td>
                       <td className="px-5 py-3 text-center">
-                        <button
-                          onClick={e => { e.stopPropagation(); handleDelete(a.id) }}
-                          className="p-1 rounded text-navy-300 hover:text-red-500 hover:bg-red-50 transition-colors"
-                        >
-                          ✕
-                        </button>
+                        <div className="flex items-center justify-center gap-1">
+                          <button
+                            onClick={e => { e.stopPropagation(); setEditingAssignment(a) }}
+                            className="p-1 rounded text-navy-300 hover:text-navy-700 hover:bg-navy-50 transition-colors"
+                            title="Sửa bài tập"
+                          >
+                            <Pencil size={14} />
+                          </button>
+                          <button
+                            onClick={e => { e.stopPropagation(); handleDelete(a.id) }}
+                            className="p-1 rounded text-navy-300 hover:text-red-500 hover:bg-red-50 transition-colors"
+                            title="Xóa bài tập"
+                          >
+                            ✕
+                          </button>
+                        </div>
                       </td>
                     </tr>
                   )
@@ -451,6 +504,14 @@ const AssignView = ({ classId, onBack }) => {
         open={modalOpen}
         onClose={() => setModalOpen(false)}
         onSave={handleSave}
+      />
+
+      {/* Edit modal */}
+      <HomeworkAssignmentModal
+        open={!!editingAssignment}
+        onClose={() => setEditingAssignment(null)}
+        initial={editingAssignment}
+        onSave={handleEditSave}
       />
     </div>
   )

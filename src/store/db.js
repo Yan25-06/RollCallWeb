@@ -53,6 +53,8 @@ export const deleteStudent = (id) => {
   saveSessionReviews(getSessionReviews().filter(r => r.studentId !== id))
   savePayments(getPayments().filter(p => p.studentId !== id))
   saveSubmissions(getSubmissions().filter(s => s.studentId !== id))
+  // Cascade: xoa MockTestResult cua hoc sinh nay
+  saveMockTestResults(getMockTestResults().filter(r => r.studentId !== id))
 }
 
 // ─── Classes ────────────────────────────────────────────
@@ -70,15 +72,23 @@ export const updateClass = (id, data) => {
 export const deleteClass = (id) => {
   saveClasses(getClasses().filter(c => c.id !== id))
   saveEnrollments(getEnrollments().filter(e => e.classId !== id))
-  const deletedSessionIds = new Set(getSessions().filter(s => s.classId === id).map(s => s.id))
-  saveSessions(getSessions().filter(s => s.classId !== id))
+  // Cache sessions truoc khi xoa de tranh doc localStorage 2 lan
+  const allSessions = getSessions()
+  const deletedSessionIds = new Set(allSessions.filter(s => s.classId === id).map(s => s.id))
+  saveSessions(allSessions.filter(s => s.classId !== id))
   saveAttendance(getAttendance().filter(a => !deletedSessionIds.has(a.sessionId)))
   saveHomeworks(getHomeworks().filter(h => !deletedSessionIds.has(h.sessionId)))
   saveSessionReviews(getSessionReviews().filter(r => r.classId !== id))
-  const deletedAssignmentIds = new Set(getHwAssignments().filter(a => a.classId === id).map(a => a.id))
-  saveHwAssignments(getHwAssignments().filter(a => a.classId !== id))
+  const allHwAssignments = getHwAssignments()
+  const deletedAssignmentIds = new Set(allHwAssignments.filter(a => a.classId === id).map(a => a.id))
+  saveHwAssignments(allHwAssignments.filter(a => a.classId !== id))
   saveSubmissions(getSubmissions().filter(s => !deletedAssignmentIds.has(s.hwAssignmentId)))
   savePayments(getPayments().filter(p => p.classId !== id))
+  // Cascade: xoa MockTest va MockTestResult cua lop nay
+  const allMockTests = getMockTests()
+  const deletedMockTestIds = new Set(allMockTests.filter(t => t.classId === id).map(t => t.id))
+  saveMockTests(allMockTests.filter(t => t.classId !== id))
+  saveMockTestResults(getMockTestResults().filter(r => !deletedMockTestIds.has(r.mockTestId)))
 }
 
 // ─── Attendance ─────────────────────────────────────────
@@ -310,6 +320,14 @@ export const createSession = (data) => {
 
   return session
 }
+
+// Update session metadata (date, time, topic, note) without touching attendance/homeworks
+export const updateSession = (id, data) => {
+  saveSessions(getSessions().map(s =>
+    s.id === id ? { ...s, ...data, updatedAt: new Date().toISOString() } : s
+  ))
+}
+
 
 export const deleteSession = (id) => {
   saveSessions(getSessions().filter(s => s.id !== id))

@@ -2,31 +2,41 @@ import { useMemo } from 'react'
 import { X } from 'lucide-react'
 import { clsx } from 'clsx'
 import { Badge } from '@/components/ui'
-import { getSessionsByClass, getHomeworkByStudent } from '@/store/db'
+import { getSessionsByClass, getHomeworkByStudent, getEnrollment } from '@/store/db'
 import { AttendanceRingChart } from './AttendanceRingChart'
 
 export const StudentHomeworkPanel = ({ student, classId, onClose }) => {
   const sessions = useMemo(() => getSessionsByClass(classId), [classId])
   const homeworks = useMemo(() => getHomeworkByStudent(student?.id || '', classId), [student?.id, classId])
 
+  // Get enrollment date so we don't penalize student for sessions before they joined
+  const enrollment = useMemo(() => getEnrollment(student?.id, classId), [student?.id, classId])
+  const enrolledDate = enrollment?.enrolledAt ? enrollment.enrolledAt.split('T')[0] : null
+
   const history = useMemo(() => {
     return sessions.map(session => {
       const hw = homeworks.find(h => h.sessionId === session.id)
-      return {
-        session,
-        hw
-      }
+      return { session, hw }
     })
   }, [sessions, homeworks])
 
-  const pastSessions = sessions.filter(s => s.date <= new Date().toISOString().split('T')[0])
-  const totalCount = pastSessions.length
-  
+  // Only count past sessions from enrollment date onwards
+  const relevantHistory = useMemo(() => {
+    const today = new Date().toISOString().split('T')[0]
+    return history.filter(h => {
+      const isPast = h.session.date <= today
+      const afterEnroll = !enrolledDate || h.session.date >= enrolledDate
+      return isPast && afterEnroll
+    })
+  }, [history, enrolledDate])
+
+  const totalCount = relevantHistory.length
+
   let doneCount = 0
   let inProgressCount = 0
   let notDoneCount = 0
-  
-  history.filter(h => h.session.date <= new Date().toISOString().split('T')[0]).forEach(h => {
+
+  relevantHistory.forEach(h => {
     if (h.hw?.progress === 'done') doneCount++
     else if (h.hw?.progress === 'in_progress') inProgressCount++
     else notDoneCount++

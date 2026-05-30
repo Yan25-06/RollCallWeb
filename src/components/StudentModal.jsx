@@ -7,7 +7,6 @@ export const StudentModal = ({ open, onClose, student = null, classes = [], onSa
     classId: '',
     grade: '',
     phone: '',
-    feePerSession: 0,
     note: '',
   })
   const [errors, setErrors] = useState({})
@@ -20,7 +19,6 @@ export const StudentModal = ({ open, onClose, student = null, classes = [], onSa
           classId: student.classId || '',
           grade: student.grade || '',
           phone: student.phone || '',
-          feePerSession: student.feePerSession || 0,
           note: student.note || '',
         })
       } else {
@@ -29,7 +27,6 @@ export const StudentModal = ({ open, onClose, student = null, classes = [], onSa
           classId: classes.length > 0 ? classes[0].id : '',
           grade: '',
           phone: '',
-          feePerSession: 0,
           note: '',
         })
       }
@@ -39,10 +36,7 @@ export const StudentModal = ({ open, onClose, student = null, classes = [], onSa
 
   const handleChange = (e) => {
     const { name, value } = e.target
-    setFormData(prev => ({
-      ...prev,
-      [name]: name === 'feePerSession' ? Number(value) : value
-    }))
+    setFormData(prev => ({ ...prev, [name]: value }))
     if (errors[name]) {
       setErrors(prev => ({ ...prev, [name]: null }))
     }
@@ -50,8 +44,7 @@ export const StudentModal = ({ open, onClose, student = null, classes = [], onSa
 
   const handleSubmit = (e) => {
     e.preventDefault()
-    
-    // Validation
+
     const newErrors = {}
     if (!formData.name.trim()) newErrors.name = 'Họ và tên là bắt buộc'
     if (!formData.classId) newErrors.classId = 'Lớp học là bắt buộc'
@@ -61,7 +54,7 @@ export const StudentModal = ({ open, onClose, student = null, classes = [], onSa
       return
     }
 
-    onSave({ ...formData, feePerSession: Number(formData.feePerSession) || 0 })
+    onSave(formData)
     toast.success(student ? 'Đã cập nhật học sinh!' : 'Đã thêm học sinh!')
     onClose()
   }
@@ -87,7 +80,7 @@ export const StudentModal = ({ open, onClose, student = null, classes = [], onSa
           error={errors.name}
           placeholder="Nhập họ và tên..."
         />
-        
+
         <Select
           label="Lớp học"
           name="classId"
@@ -118,16 +111,6 @@ export const StudentModal = ({ open, onClose, student = null, classes = [], onSa
             placeholder="SĐT Phụ huynh"
           />
         </div>
-
-        <Input
-          label="Học phí/buổi (VNĐ)"
-          name="feePerSession"
-          type="number"
-          value={formData.feePerSession}
-          onChange={handleChange}
-          min="0"
-          step="1000"
-        />
 
         <Input
           label="Ghi chú"

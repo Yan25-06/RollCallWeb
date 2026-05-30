@@ -3,11 +3,15 @@ import { X } from 'lucide-react'
 import { clsx } from 'clsx'
 import { AttendanceRingChart } from './AttendanceRingChart'
 import { Badge } from '@/components/ui'
-import { getSessionsByClass, getAttendanceByStudent } from '@/store/db'
+import { getSessionsByClass, getAttendanceByStudent, getEnrollment } from '@/store/db'
 
 export const StudentAttendancePanel = ({ student, classId, onClose }) => {
   const sessions = useMemo(() => getSessionsByClass(classId), [classId])
   const attendances = useMemo(() => getAttendanceByStudent(student?.id || ''), [student?.id])
+
+  // Get enrollment date so we don't penalize student for sessions before they joined
+  const enrollment = useMemo(() => getEnrollment(student?.id, classId), [student?.id, classId])
+  const enrolledDate = enrollment?.enrolledAt ? enrollment.enrolledAt.split('T')[0] : null
 
   const history = useMemo(() => {
     return sessions.map(session => {
@@ -20,9 +24,18 @@ export const StudentAttendancePanel = ({ student, classId, onClose }) => {
     })
   }, [sessions, attendances])
 
-  const presentCount = history.filter(h => h.present === true).length
-  const pastSessions = sessions.filter(s => s.date <= new Date().toISOString().split('T')[0])
-  const totalCount = pastSessions.length
+  // Only count past sessions from enrollment date onwards
+  const relevantHistory = useMemo(() => {
+    const today = new Date().toISOString().split('T')[0]
+    return history.filter(h => {
+      const isPast = h.session.date <= today
+      const afterEnroll = !enrolledDate || h.session.date >= enrolledDate
+      return isPast && afterEnroll
+    })
+  }, [history, enrolledDate])
+
+  const presentCount = relevantHistory.filter(h => h.present === true).length
+  const totalCount = relevantHistory.length
   const percent = totalCount > 0 ? Math.round((presentCount / totalCount) * 100) : 0
 
   const formatDate = (isoStr) => {

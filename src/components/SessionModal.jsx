@@ -1,9 +1,12 @@
 import { useState, useEffect } from 'react'
 import { X } from 'lucide-react'
 import { Button, Input, toast } from '@/components/ui'
-import { createSession, getSessionsByClass } from '@/store/db'
+import { createSession, updateSession, getSessionsByClass } from '@/store/db'
 
-export const SessionModal = ({ open, onClose, classId, onSaved }) => {
+// session prop = null → create mode | session object → edit mode
+export const SessionModal = ({ open, onClose, classId, session = null, onSaved }) => {
+  const isEdit = !!session
+
   const [date, setDate] = useState('')
   const [startTime, setStartTime] = useState('08:00')
   const [endTime, setEndTime] = useState('09:30')
@@ -12,44 +15,45 @@ export const SessionModal = ({ open, onClose, classId, onSaved }) => {
   const [confirmSameDay, setConfirmSameDay] = useState(false)
 
   useEffect(() => {
-    if (open) {
+    if (!open) return
+    if (isEdit) {
+      setDate(session.date || '')
+      setStartTime(session.startTime || '08:00')
+      setEndTime(session.endTime || '09:30')
+      setTopic(session.topic || '')
+      setNote(session.note || '')
+    } else {
       setDate(new Date().toISOString().split('T')[0])
       setStartTime('08:00')
       setEndTime('09:30')
       setTopic('')
       setNote('')
-      setConfirmSameDay(false)
     }
-  }, [open])
+    setConfirmSameDay(false)
+  }, [open, session])
 
   const handleSubmit = () => {
-    if (!date) {
-      toast.error('Vui lòng chọn ngày học')
-      return
-    }
-    if (startTime >= endTime) {
-      toast.error('Giờ kết thúc phải sau giờ bắt đầu')
+    if (!date) { toast.error('Vui lòng chọn ngày học'); return }
+    if (startTime >= endTime) { toast.error('Giờ kết thúc phải sau giờ bắt đầu'); return }
+
+    if (isEdit) {
+      updateSession(session.id, { date, startTime, endTime, topic, note })
+      toast.success('Đã cập nhật buổi học')
+      onSaved?.(session.id)
+      onClose?.()
       return
     }
 
+    // Create mode: warn if same day (excluding this session itself for edit)
     const existingSessions = getSessionsByClass(classId)
     const hasSameDay = existingSessions.some(s => s.date === date)
-
     if (hasSameDay && !confirmSameDay) {
       toast.warning('Đã có buổi học trong ngày này. Bạn có chắc muốn tạo thêm?')
       setConfirmSameDay(true)
       return
     }
 
-    const newSession = createSession({
-      classId,
-      date,
-      startTime,
-      endTime,
-      topic,
-      note
-    })
-
+    const newSession = createSession({ classId, date, startTime, endTime, topic, note })
     const dateFormatted = new Date(date).toLocaleDateString('vi-VN', { day: '2-digit', month: '2-digit' })
     toast.success(`Đã tạo buổi ${dateFormatted}!`)
     onSaved?.(newSession.id)
@@ -66,7 +70,9 @@ export const SessionModal = ({ open, onClose, classId, onSaved }) => {
       <div className="bg-white rounded-3xl shadow-navy-xl w-full max-w-md animate-slide-up overflow-hidden">
         {/* Header */}
         <div className="px-6 pt-6 pb-4 border-b border-navy-50 flex items-center justify-between">
-          <h2 className="text-base font-semibold text-navy-900">Tạo buổi học mới</h2>
+          <h2 className="text-base font-semibold text-navy-900">
+            {isEdit ? 'Chỉnh sửa buổi học' : 'Tạo buổi học mới'}
+          </h2>
           <button
             onClick={onClose}
             className="p-1.5 text-navy-400 hover:text-navy-700 hover:bg-navy-100 rounded-lg transition-colors"
@@ -117,9 +123,9 @@ export const SessionModal = ({ open, onClose, classId, onSaved }) => {
             />
           </div>
 
-          {confirmSameDay && (
+          {!isEdit && confirmSameDay && (
             <div className="bg-amber-50 border border-amber-200 text-amber-800 text-sm p-3 rounded-xl mt-2">
-              <strong>Cảnh báo:</strong> Đã có buổi học trong ngày này. Bạn có chắc muốn tạo thêm? Bấm "Tạo buổi học" lần nữa để xác nhận.
+              <strong>Cảnh báo:</strong> Đã có buổi học trong ngày này. Bạn có chắc muốn tạo thêm? Bấm &ldquo;Tạo buổi học&rdquo; lần nữa để xác nhận.
             </div>
           )}
         </div>
@@ -128,7 +134,7 @@ export const SessionModal = ({ open, onClose, classId, onSaved }) => {
         <div className="px-6 py-4 bg-navy-50 flex justify-end gap-3">
           <Button variant="secondary" onClick={onClose}>Hủy</Button>
           <Button variant="primary" onClick={handleSubmit}>
-            Tạo buổi học
+            {isEdit ? 'Lưu thay đổi' : 'Tạo buổi học'}
           </Button>
         </div>
       </div>

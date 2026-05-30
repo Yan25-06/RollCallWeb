@@ -1,4 +1,4 @@
-import { useState, useRef, useCallback } from 'react'
+import { useState, useEffect, useRef, useCallback } from 'react'
 import { clsx } from 'clsx'
 import { upsertSubmission } from '@/store/db'
 import { getInitials } from '@/utils/helpers'
@@ -16,7 +16,16 @@ const SavedIndicator = ({ show }) => (
 const SubmissionRow = ({ student, submission, hwAssignmentId, onUpdate }) => {
   const [saved, setSaved] = useState(false)
   const [scoreError, setScoreError] = useState('')
+  // Controlled state so inputs stay in sync when submission prop changes
+  const [scoreVal, setScoreVal] = useState(submission?.score ?? '')
+  const [commentVal, setCommentVal] = useState(submission?.comment ?? '')
   const debounceRef = useRef(null)
+
+  // Sync controlled inputs when parent passes updated submission
+  useEffect(() => {
+    setScoreVal(submission?.score ?? '')
+    setCommentVal(submission?.comment ?? '')
+  }, [submission?.score, submission?.comment])
 
   const flash = () => { setSaved(true); setTimeout(() => setSaved(false), 1500) }
 
@@ -31,6 +40,7 @@ const SubmissionRow = ({ student, submission, hwAssignmentId, onUpdate }) => {
   }
 
   const handleScore = (val) => {
+    setScoreVal(val)
     const n = val === '' ? undefined : Number(val)
     if (val !== '' && (isNaN(n) || n < 0 || n > 10)) {
       setScoreError('0–10')
@@ -39,17 +49,19 @@ const SubmissionRow = ({ student, submission, hwAssignmentId, onUpdate }) => {
     setScoreError('')
     if (debounceRef.current) clearTimeout(debounceRef.current)
     debounceRef.current = setTimeout(() => {
-      save({ submitted: submission?.submitted ?? false, score: n, comment: submission?.comment })
+      save({ submitted: submission?.submitted ?? false, score: n, comment: commentVal })
     }, 300)
   }
 
   const handleComment = (val) => {
+    setCommentVal(val)
     if (debounceRef.current) clearTimeout(debounceRef.current)
     debounceRef.current = setTimeout(() => {
       save({ submitted: submission?.submitted ?? false, score: submission?.score, comment: val })
     }, 300)
   }
 
+  // gradedAt is stored as Unix timestamp (Date.now()) → format correctly
   const gradedAt = submission?.gradedAt
     ? new Date(submission.gradedAt).toLocaleDateString('vi-VN')
     : '—'
@@ -83,8 +95,8 @@ const SubmissionRow = ({ student, submission, hwAssignmentId, onUpdate }) => {
             max="10"
             step="0.25"
             placeholder="—"
-            defaultValue={submission?.score ?? ''}
-            onBlur={e => handleScore(e.target.value)}
+            value={scoreVal}
+            onChange={e => handleScore(e.target.value)}
             className={clsx(
               'input text-sm w-20 text-center',
               scoreError && 'border-red-400'
@@ -97,8 +109,8 @@ const SubmissionRow = ({ student, submission, hwAssignmentId, onUpdate }) => {
         <input
           type="text"
           placeholder="Nhận xét..."
-          defaultValue={submission?.comment ?? ''}
-          onBlur={e => handleComment(e.target.value)}
+          value={commentVal}
+          onChange={e => handleComment(e.target.value)}
           className="input text-sm w-full"
         />
       </td>

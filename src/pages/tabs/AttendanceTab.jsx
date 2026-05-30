@@ -1,14 +1,14 @@
 import { useState, useEffect, useMemo } from 'react'
 import { clsx } from 'clsx'
-import { Trash2, FileText } from 'lucide-react'
+import { Trash2, FileText, Pencil } from 'lucide-react'
 import { Button, Card, toast } from '@/components/ui'
 import { SessionSelector } from '@/components/SessionSelector'
 import { SessionModal } from '@/components/SessionModal'
 import { AttendanceToggle } from '@/components/AttendanceToggle'
 import { StudentAttendancePanel } from '@/components/StudentAttendancePanel'
 import {
-  getSessionsByClass, getAttendanceBySession,
-  upsertAttendanceBySession, deleteSession, getEnrollmentsByClass, getStudents, getAttendanceRate
+  getSessionsByClass, getAttendanceBySession, getAttendance,
+  upsertAttendanceBySession, deleteSession, getEnrollmentsByClass, getStudents
 } from '@/store/db'
 import { getInitials } from '@/utils/helpers'
 
@@ -20,6 +20,7 @@ export const AttendanceTab = ({ classId }) => {
   const [attendance, setAttendance] = useState([])
   
   const [sessionModalOpen, setSessionModalOpen] = useState(false)
+  const [editingSession, setEditingSession] = useState(null)  // null = closed
   const [selectedStudent, setSelectedStudent] = useState(null)
 
   // Effect to load initial data
@@ -66,19 +67,52 @@ export const AttendanceTab = ({ classId }) => {
     }
   }
 
+  const handleEditSession = () => {
+    const session = sessions.find(s => s.id === activeSessionId)
+    if (session) setEditingSession(session)
+  }
+
+  const handleSessionUpdated = () => {
+    // Refresh session list, stay on the same active session
+    setSessions(getSessionsByClass(classId))
+  }
+
   const handleToggle = (studentId, present) => {
     if (!activeSessionId) return
-    upsertAttendanceBySession(activeSessionId, studentId, present, '')
-    // Update local state instantly
+    // Pass undefined (not '') so existing note is NOT overwritten
+    upsertAttendanceBySession(activeSessionId, studentId, present, undefined)
     setAttendance(getAttendanceBySession(activeSessionId))
   }
+
 
   const handleNoteChange = (studentId, note) => {
     if (!activeSessionId) return
     const att = attendance.find(a => a.studentId === studentId)
+    // Don't create a ghost record if there's no existing attendance and the note is empty
+    if (!att && !note.trim()) return
     upsertAttendanceBySession(activeSessionId, studentId, att ? att.present : null, note)
     setAttendance(getAttendanceBySession(activeSessionId))
   }
+
+  // Pre-compute attendance rates for all students in one pass
+  // (avoids N×2 localStorage reads from calling getAttendanceRate per row)
+  const attendanceRates = useMemo(() => {
+    if (students.length === 0) return {}
+    const today = new Date().toISOString().split('T')[0]
+    const classSessions = getSessionsByClass(classId).filter(s => s.date <= today)
+    if (classSessions.length === 0) {
+      return Object.fromEntries(students.map(s => [s.id, null]))
+    }
+    const sessionIdSet = new Set(classSessions.map(s => s.id))
+    // Single read of all attendance records for this class's sessions
+    const classAtts = getAttendance().filter(a => sessionIdSet.has(a.sessionId))
+    return Object.fromEntries(students.map(student => {
+      const presentCount = classAtts.filter(
+        a => a.studentId === student.id && a.present === true
+      ).length
+      return [student.id, Math.round((presentCount / classSessions.length) * 100)]
+    }))
+  }, [students, classId, attendance]) // recompute when attendance changes
 
   const presentCount = attendance.filter(a => a.present === true).length
   const totalActive = enrollments.filter(e => e.status === 'active').length
@@ -95,18 +129,25 @@ export const AttendanceTab = ({ classId }) => {
         />
         
         {activeSessionId && (
-          <div className="flex items-center gap-4">
-            <div className="px-3 py-1.5 bg-navy-50 rounded-xl text-sm font-medium text-navy-800 border border-navy-100">
-              Có mặt: <span className="text-emerald-600">{presentCount}</span> / {totalActive}
+          <div className="flex items-center gap-2">
+              <div className="px-3 py-1.5 bg-navy-50 rounded-xl text-sm font-medium text-navy-800 border border-navy-100">
+                Có mặt: <span className="text-emerald-600">{presentCount}</span> / {totalActive}
+              </div>
+              <button
+                onClick={handleEditSession}
+                className="p-1.5 text-navy-400 hover:text-navy-700 hover:bg-navy-50 rounded-lg transition-colors"
+                title="Chỉnh sửa buổi này"
+              >
+                <Pencil size={16} />
+              </button>
+              <button
+                onClick={handleDeleteSession}
+                className="p-1.5 text-navy-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+                title="Xóa buổi này"
+              >
+                <Trash2 size={18} />
+              </button>
             </div>
-            <button
-              onClick={handleDeleteSession}
-              className="p-1.5 text-navy-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors"
-              title="Xóa buổi này"
-            >
-              <Trash2 size={18} />
-            </button>
-          </div>
         )}
       </div>
 
@@ -139,7 +180,7 @@ export const AttendanceTab = ({ classId }) => {
                   const att = attendance.find(a => a.studentId === student.id)
                   const present = att ? att.present : null
                   const note = att ? att.note : ''
-                  const rate = getAttendanceRate(student.id, classId)
+                  const rate = attendanceRates[student.id] ?? null
 
                   return (
                     <tr 
@@ -210,6 +251,15 @@ export const AttendanceTab = ({ classId }) => {
         onClose={() => setSessionModalOpen(false)}
         classId={classId}
         onSaved={handleSessionSaved}
+      />
+
+      {/* Edit session modal */}
+      <SessionModal
+        open={!!editingSession}
+        onClose={() => setEditingSession(null)}
+        classId={classId}
+        session={editingSession}
+        onSaved={handleSessionUpdated}
       />
 
       {selectedStudent && (

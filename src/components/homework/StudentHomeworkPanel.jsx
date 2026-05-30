@@ -3,7 +3,7 @@ import { X } from 'lucide-react'
 import { clsx } from 'clsx'
 import { Badge } from '@/components/ui'
 import { getSessionsByClass, getHomeworkByStudent, getEnrollment } from '@/store/db'
-import { AttendanceRingChart } from './AttendanceRingChart'
+import { AttendanceRingChart } from '@/components/attendance/AttendanceRingChart'
 
 export const StudentHomeworkPanel = ({ student, classId, onClose }) => {
   const sessions = useMemo(() => getSessionsByClass(classId), [classId])

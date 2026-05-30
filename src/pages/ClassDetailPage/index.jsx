@@ -2,10 +2,10 @@ import { useState, useEffect } from 'react'
 import { ChevronLeft, Users } from 'lucide-react'
 import { clsx } from 'clsx'
 import { getClasses, getEnrollmentsByClass } from '@/store/db'
-import { StudentsTab } from '@/pages/tabs/StudentsTab'
-import { AttendanceTab } from '@/pages/tabs/AttendanceTab'
-import { HomeworkTab } from '@/pages/tabs/HomeworkTab'
-import { MockTestTab } from '@/pages/tabs/MockTestTab'
+import { StudentsTab } from './tabs/StudentsTab'
+import { AttendanceTab } from './tabs/AttendanceTab'
+import { HomeworkTab } from './tabs/HomeworkTab'
+import { MockTestTab } from './tabs/MockTestTab'
 
 const TABS = [
   { id: 'students',    label: 'Học Viên',  disabled: false },

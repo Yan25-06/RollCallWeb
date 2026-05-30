@@ -2,10 +2,10 @@ import { useState, useEffect, useMemo } from 'react'
 import { clsx } from 'clsx'
 import { Trash2, FileText, Pencil } from 'lucide-react'
 import { Button, Card, toast } from '@/components/ui'
-import { SessionSelector } from '@/components/SessionSelector'
-import { SessionModal } from '@/components/SessionModal'
-import { AttendanceToggle } from '@/components/AttendanceToggle'
-import { StudentAttendancePanel } from '@/components/StudentAttendancePanel'
+import { SessionSelector } from '@/components/classes/SessionSelector'
+import { SessionModal } from '@/components/classes/SessionModal'
+import { AttendanceToggle } from '@/components/attendance/AttendanceToggle'
+import { StudentAttendancePanel } from '@/components/attendance/StudentAttendancePanel'
 import {
   getSessionsByClass, getAttendanceBySession, getAttendance,
   upsertAttendanceBySession, deleteSession, getEnrollmentsByClass, getStudents

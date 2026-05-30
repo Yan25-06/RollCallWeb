@@ -2,9 +2,9 @@ import { useState, useEffect, useCallback } from 'react'
 import { clsx } from 'clsx'
 import { Users } from 'lucide-react'
 import { Skeleton, Card, Button } from '@/components/ui'
-import { StudentSidebar } from '@/components/StudentSidebar'
-import { StudentDetailPanel } from '@/components/StudentDetailPanel'
-import { EnrollmentModal } from '@/components/EnrollmentModal'
+import { StudentSidebar } from '@/components/students/StudentSidebar'
+import { StudentDetailPanel } from '@/components/students/StudentDetailPanel'
+import { EnrollmentModal } from '@/components/students/EnrollmentModal'
 import {
   getStudents, getEnrollmentsByClass, getEnrollment
 } from '@/store/db'

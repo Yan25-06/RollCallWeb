@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react'
 import { X } from 'lucide-react'
 import { Button, Input, toast } from '@/components/ui'
 import { createMockTest, updateMockTest, getMockTestResultsByTest } from '@/store/db'
-import { MockTestSectionBuilder, DEFAULT_SECTIONS } from '@/components/MockTestSectionBuilder'
+import { MockTestSectionBuilder, DEFAULT_SECTIONS } from './MockTestSectionBuilder'
 
 export const MockTestModal = ({ open, onClose, classId, mockTest, onSaved }) => {
   const mode = mockTest ? 'edit' : 'create'

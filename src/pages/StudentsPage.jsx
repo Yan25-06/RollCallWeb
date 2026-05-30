@@ -7,9 +7,9 @@ import {
   getClasses, addClass, updateClass, deleteClass,
   getEnrollmentsByClass
 } from '@/store/db'
-import { StudentModal } from '@/components/StudentModal'
-import { ClassModal } from '@/components/ClassModal'
-import { ClassCard } from '@/components/ClassCard'
+import { StudentModal } from '@/components/students/StudentModal'
+import { ClassModal } from '@/components/classes/ClassModal'
+import { ClassCard } from '@/components/classes/ClassCard'
 
 export const StudentsPage = () => {
   const [activeTab, setActiveTab] = useState('students')

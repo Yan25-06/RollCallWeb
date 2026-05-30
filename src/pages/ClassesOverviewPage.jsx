@@ -2,8 +2,8 @@ import { useState, useEffect } from 'react'
 import { Card, Button, Empty, toast } from '@/components/ui'
 import { Plus, BookOpen } from 'lucide-react'
 import { getClasses, addClass, updateClass, deleteClass, getEnrollmentsByClass } from '@/store/db'
-import { ClassModal } from '@/components/ClassModal'
-import { ClassCard } from '@/components/ClassCard'
+import { ClassModal } from '@/components/classes/ClassModal'
+import { ClassCard } from '@/components/classes/ClassCard'
 
 export const ClassesOverviewPage = ({ onSelectClass }) => {
   const [classes, setClasses] = useState([])

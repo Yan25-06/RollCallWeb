@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { Navbar } from '@/components/Navbar'
+import { Navbar } from '@/components/layout/Navbar'
 import { ToastContainer } from '@/components/ui'
 import { DashboardPage } from '@/pages/DashboardPage'
 import { SettingsPage } from '@/pages/SettingsPage'

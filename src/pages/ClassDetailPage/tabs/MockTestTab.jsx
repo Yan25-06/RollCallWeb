@@ -2,9 +2,9 @@ import { useState, useEffect, useCallback } from 'react'
 import { Plus, Pencil, Trash2, FileSpreadsheet, FileText, ChevronDown, ChevronUp, ClipboardList } from 'lucide-react'
 import { clsx } from 'clsx'
 import { Button, Card, toast } from '@/components/ui'
-import { MockTestModal } from '@/components/MockTestModal'
-import { MockTestScoreTable } from '@/components/MockTestScoreTable'
-import { StudentTestProfile } from '@/components/StudentTestProfile'
+import { MockTestModal } from '@/components/mock-test/MockTestModal'
+import { MockTestScoreTable } from '@/components/mock-test/MockTestScoreTable'
+import { StudentTestProfile } from '@/components/mock-test/StudentTestProfile'
 import {
   getMockTestsByClass, getMockTestResultsByTest, deleteMockTest,
   getEnrollmentsByClass, getStudents, getResultsByStudent, getSettings,

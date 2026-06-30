@@ -12,7 +12,6 @@ import { classService, teacherService } from '@/services/classService'
 import { enrollmentService } from '@/services/enrollmentService'
 import { usePermissions } from '@/hooks/usePermissions'
 import { PayrollTab } from '@/components/schedule/PayrollTab'
-import { SubstituteAssignments } from '@/components/schedule/SubstituteAssignments'
 import { MaterialsTab } from '@/components/schedule/MaterialsTab'
 
 // ─── Helpers ────────────────────────────────────────────────
@@ -45,7 +44,7 @@ const toDateStr = (date) => {
 
 // ─── SchedulePage ────────────────────────────────────────────
 export const SchedulePage = ({ onNavigate }) => {
-  const { canFilterByTeacher: isAdmin, canCheckOwnAttendance, canViewAllPayroll } = usePermissions()
+  const { canFilterByTeacher: isAdmin, canCheckOwnAttendance, canMarkAbsent, canViewAllPayroll } = usePermissions()
 
   // Week navigation state
   const [weekStart, setWeekStart] = useState(() => getWeekStart(new Date()))
@@ -202,7 +201,7 @@ export const SchedulePage = ({ onNavigate }) => {
     }
   }, [loadData])
 
-  // Chấm công 3 trạng thái: pending → present → absent → pending (xóa record)
+  // Chấm công: GV chỉ pending↔present; admin pending→present→absent→pending.
   const handleToggleAttendance = useCallback(async (item, date) => {
     const cls = classes.find(c => c.id === item.classId)
     if (!cls?.teacherId) { toast.error('Không tìm thấy lớp/giáo viên'); return }
@@ -212,16 +211,22 @@ export const SchedulePage = ({ onNavigate }) => {
       if (cur === 'pending') {
         await teacherAttendanceService.upsert({ scheduleId: item.id, date, teacherId: cls.teacherId, status: 'present', note: record?.note ?? null })
       } else if (cur === 'present') {
-        await teacherAttendanceService.upsert({ scheduleId: item.id, date, teacherId: cls.teacherId, status: 'absent', note: record?.note ?? null, substituteTeacherId: record?.substituteTeacherId ?? null })
+        if (canMarkAbsent) {
+          await teacherAttendanceService.upsert({ scheduleId: item.id, date, teacherId: cls.teacherId, status: 'absent', note: record?.note ?? null, substituteTeacherId: record?.substituteTeacherId ?? null })
+        } else {
+          // GV thường: present → pending (xóa record), KHÔNG sang absent
+          await teacherAttendanceService.remove(item.id, date)
+        }
       } else {
-        // absent → pending: xóa record
+        // cur === 'absent'
+        if (!canMarkAbsent) return   // GV thường không được sửa "Vắng" do admin đặt
         await teacherAttendanceService.remove(item.id, date)
       }
       await loadAttendance()
     } catch {
       toast.error('Không thể chấm công')
     }
-  }, [classes, attendanceMap, loadAttendance])
+  }, [classes, attendanceMap, loadAttendance, canMarkAbsent])
 
   const handleSetAttendanceNote = useCallback(async (item, date, note) => {
     const cls = classes.find(c => c.id === item.classId)
@@ -262,16 +267,6 @@ export const SchedulePage = ({ onNavigate }) => {
       toast.error('Không thể lưu người dạy thay')
     }
   }, [classes, attendanceMap, loadAttendance])
-
-  const handleConfirmSubstitute = useCallback(async (assignment) => {
-    try {
-      await teacherAttendanceService.confirmSubstitute(assignment.scheduleId, assignment.date, true)
-      toast.success('Đã xác nhận dạy thay')
-      await loadSubAssignments()
-    } catch {
-      toast.error('Không thể xác nhận')
-    }
-  }, [loadSubAssignments])
 
   const handleAttendance = useCallback((classId) => {
     onNavigate?.('classes')
@@ -430,16 +425,6 @@ export const SchedulePage = ({ onNavigate }) => {
           {/* ── Lưới thời khóa biểu (full bề ngang) ── */}
           <div className="w-full">
 
-            {/* Buổi được giao dạy thay — above the grid */}
-            {!loading && subAssignments.length > 0 && (
-              <div className="mb-4">
-                <SubstituteAssignments
-                  assignments={subAssignments}
-                  onConfirm={handleConfirmSubstitute}
-                />
-              </div>
-            )}
-
             {/* Grid area */}
             <div className="min-w-0">
               {loading ? (
@@ -491,11 +476,13 @@ export const SchedulePage = ({ onNavigate }) => {
                     onAddDay={openAdd}
                     weekStart={weekStart}
                     canCheckAttendance={canCheckOwnAttendance}
+                    canMarkAbsent={canMarkAbsent}
                     attendanceMap={attendanceMap}
                     onToggleAttendance={handleToggleAttendance}
                     onAttendanceNote={handleSetAttendanceNote}
                     teachers={teachers}
                     onSetSubstitute={handleSetSubstitute}
+                    subAssignments={subAssignments}
                   />
                 </div>
               )}

@@ -1,5 +1,5 @@
 import { clsx } from 'clsx'
-import { ScheduleCard } from './ScheduleCard'
+import { ScheduleCard, SubstituteCard } from './ScheduleCard'
 
 const DAY_NAMES = ['CN', 'Thứ 2', 'Thứ 3', 'Thứ 4', 'Thứ 5', 'Thứ 6', 'Thứ 7']
 // Display order: Mon(1) → Sun(0) for Vietnamese convention
@@ -25,12 +25,21 @@ const dateForDay = (weekStart, dayOfWeek) => {
  * @param {Function} onEdit     - callback(item) when a card is clicked
  * @param {Function} onAddDay   - callback(dayOfWeek) when "+" in column header clicked
  */
-export const WeeklyGrid = ({ scheduleItems = [], classes = [], studentCounts = new Map(), showTeacher = false, onEdit, onAddDay, weekStart = null, canCheckAttendance = false, attendanceMap = new Map(), onToggleAttendance, onAttendanceNote, teachers = [], onSetSubstitute }) => {
+export const WeeklyGrid = ({ scheduleItems = [], classes = [], studentCounts = new Map(), showTeacher = false, onEdit, onAddDay, weekStart = null, canCheckAttendance = false, canMarkAbsent = false, attendanceMap = new Map(), onToggleAttendance, onAttendanceNote, teachers = [], onSetSubstitute, subAssignments = [] }) => {
   const byDay = {}
   for (const day of DAY_ORDER) {
     byDay[day] = scheduleItems
       .filter(s => s.dayOfWeek === day)
       .sort((a, b) => a.startTime.localeCompare(b.startTime))
+  }
+
+  // Nhóm buổi dạy thay theo dayOfWeek (suy từ chuỗi date 'YYYY-MM-DD')
+  const subsByDay = {}
+  for (const day of DAY_ORDER) subsByDay[day] = []
+  for (const a of subAssignments) {
+    if (!a.date) continue
+    const dow = new Date(a.date + 'T00:00:00').getDay()
+    if (subsByDay[dow]) subsByDay[dow].push(a)
   }
 
   const getClass = (classId) => classes.find(c => c.id === classId)
@@ -70,12 +79,13 @@ export const WeeklyGrid = ({ scheduleItems = [], classes = [], studentCounts = n
 
             {/* Cards */}
             <div className="flex flex-col gap-1.5">
-              {items.length === 0 ? (
+              {items.length === 0 && subsByDay[day].length === 0 ? (
                 <div className="h-16 rounded-xl border-2 border-dashed border-navy-100 flex items-center justify-center">
                   <span className="text-navy-200 text-xs">Trống</span>
                 </div>
               ) : (
-                items.map(item => (
+                <>
+                  {items.map(item => (
                     <ScheduleCard
                       key={item.id}
                       item={item}
@@ -84,13 +94,18 @@ export const WeeklyGrid = ({ scheduleItems = [], classes = [], studentCounts = n
                       showTeacher={showTeacher}
                       onEdit={onEdit}
                       canCheckAttendance={canCheckAttendance}
+                      canMarkAbsent={canMarkAbsent}
                       attendanceRecord={attendanceMap.get(`${item.id}_${date}`) ?? null}
                       onToggleAttendance={(it) => onToggleAttendance?.(it, date)}
                       onAttendanceNote={(it, note) => onAttendanceNote?.(it, date, note)}
                       teachers={teachers}
                       onSetSubstitute={(it, teacherId) => onSetSubstitute?.(it, date, teacherId)}
                     />
-                ))
+                  ))}
+                  {subsByDay[day].map(a => (
+                    <SubstituteCard key={`sub_${a.id}`} assignment={a} />
+                  ))}
+                </>
               )}
             </div>
           </div>
@@ -107,7 +122,7 @@ export const WeeklyGrid = ({ scheduleItems = [], classes = [], studentCounts = n
             const cls = getClass(item.classId)
             return !cls?.startDate || date >= cls.startDate
           })
-          if (items.length === 0) return null
+          if (items.length === 0 && subsByDay[day].length === 0) return null
           return (
             <div key={day} className="flex flex-col gap-2">
               <div className="flex items-center gap-2">
@@ -131,12 +146,16 @@ export const WeeklyGrid = ({ scheduleItems = [], classes = [], studentCounts = n
                       showTeacher={showTeacher}
                       onEdit={onEdit}
                       canCheckAttendance={canCheckAttendance}
+                      canMarkAbsent={canMarkAbsent}
                       attendanceRecord={attendanceMap.get(`${item.id}_${date}`) ?? null}
                       onToggleAttendance={(it) => onToggleAttendance?.(it, date)}
                       onAttendanceNote={(it, note) => onAttendanceNote?.(it, date, note)}
                       teachers={teachers}
                       onSetSubstitute={(it, teacherId) => onSetSubstitute?.(it, date, teacherId)}
                     />
+                ))}
+                {subsByDay[day].map(a => (
+                  <SubstituteCard key={`sub_${a.id}`} assignment={a} />
                 ))}
               </div>
             </div>

@@ -16,6 +16,7 @@ export function usePermissions() {
     canManageClasses: isAdmin,
     canFilterByTeacher: isAdmin,
     canCheckOwnAttendance: true,
+    canMarkAbsent: isAdmin,
     canViewAllPayroll: isAdmin,
   }
 }

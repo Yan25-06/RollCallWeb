@@ -95,7 +95,7 @@ const SubstituteDropdown = ({ teachers, cls, value, onChange, noteVal, onNote, o
 }
 
 // ─── ScheduleCard ──────────────────────────────────────────
-export const ScheduleCard = ({ item, cls, studentCount, showTeacher, onEdit, canCheckAttendance = false, attendanceRecord = null, onToggleAttendance, onAttendanceNote, teachers = [], onSetSubstitute }) => {
+export const ScheduleCard = ({ item, cls, studentCount, showTeacher, onEdit, canCheckAttendance = false, canMarkAbsent = false, attendanceRecord = null, onToggleAttendance, onAttendanceNote, teachers = [], onSetSubstitute }) => {
   const color = getCourseColor(cls?.courseType)
 
   // 3 trạng thái: không có record (hoặc status lạ) = 'pending'; 'present'; 'absent'.
@@ -142,7 +142,7 @@ export const ScheduleCard = ({ item, cls, studentCount, showTeacher, onEdit, can
               'ml-auto shrink-0 inline-flex items-center gap-1 px-1.5 py-0.5 rounded-full text-xs font-semibold border transition-colors',
               att.bg, att.text, att.border, 'hover:opacity-80'
             )}
-            title="Bấm để đổi: Chưa xác nhận → Đã dạy → Vắng"
+            title={canMarkAbsent ? 'Bấm để đổi: Chưa xác nhận → Đã dạy → Vắng' : 'Bấm để đổi: Chưa xác nhận → Đã dạy'}
             onClick={(e) => { e.stopPropagation(); onToggleAttendance?.(item) }}
           >
             <span className={clsx('w-1.5 h-1.5 rounded-full', att.dot)} />
@@ -180,8 +180,8 @@ export const ScheduleCard = ({ item, cls, studentCount, showTeacher, onEdit, can
         </div>
       )}
 
-      {/* Khi Vắng: chọn người dạy thay + ghi chú */}
-      {canCheckAttendance && isAbsent && (
+      {/* Khi Vắng: chọn người dạy thay + ghi chú (chỉ admin) */}
+      {canMarkAbsent && isAbsent && (
         <SubstituteDropdown
           teachers={teachers}
           cls={cls}
@@ -192,6 +192,39 @@ export const ScheduleCard = ({ item, cls, studentCount, showTeacher, onEdit, can
           onOpenChange={setDropdownOpen}
         />
       )}
+    </div>
+  )
+}
+
+// ─── SubstituteCard ────────────────────────────────────────
+// Card read-only hiển thị buổi GV hiện tại được giao dạy thay.
+// Không có chip chấm công, không click chỉnh sửa.
+export const SubstituteCard = ({ assignment }) => {
+  const color = getCourseColor() // default xám
+  return (
+    <div className={clsx('relative rounded-xl border p-2.5', color.bg, color.border)}>
+      <div className="flex items-center gap-1.5 mb-1.5">
+        <span className={clsx('w-2 h-2 rounded-full shrink-0', color.dot)} />
+        <span className={clsx('text-xs font-semibold truncate', color.text)}>
+          {assignment.className ?? '—'}
+        </span>
+        <span className="ml-auto shrink-0 inline-flex items-center px-1.5 py-0.5 rounded-full text-xs font-semibold bg-amber-100 text-amber-700 border border-amber-200">
+          Dạy thay
+        </span>
+      </div>
+      <div className={clsx('flex items-center gap-1 text-xs', color.text)}>
+        <Clock size={11} className="shrink-0" />
+        <span>{fmtTime(assignment.startTime)}–{fmtTime(assignment.endTime)}</span>
+      </div>
+      {assignment.room && (
+        <div className={clsx('flex items-center gap-1 text-xs mt-0.5', color.text, 'opacity-80')}>
+          <MapPin size={11} className="shrink-0" />
+          <span className="truncate">{assignment.room}</span>
+        </div>
+      )}
+      <div className={clsx('text-xs mt-0.5 truncate', color.text, 'opacity-70')}>
+        Thay: {assignment.mainTeacherName ?? '—'}
+      </div>
     </div>
   )
 }

@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback, useMemo } from 'react'
-import { Plus, ExternalLink, Pencil, Trash2, FileText, ChevronDown, ChevronRight } from 'lucide-react'
+import { Plus, ExternalLink, Pencil, Trash2, FileText, ChevronDown, ChevronRight, Upload } from 'lucide-react'
 import { clsx } from 'clsx'
 import { Button, Empty, Skeleton, toast } from '@/components/ui'
 import { curriculumService } from '@/services/curriculumService'
@@ -8,6 +8,7 @@ import { getMaterialType } from './materialType'
 import { MaterialModal } from './MaterialModal'
 import { MonthModal } from './MonthModal'
 import { SessionModal } from './SessionModal'
+import { ImportCurriculumModal } from './ImportCurriculumModal'
 
 /**
  * MaterialsTab — giáo trình & tài liệu theo courseType.
@@ -24,6 +25,7 @@ export const MaterialsTab = ({ isAdmin = false }) => {
   const [monthModal, setMonthModal] = useState({ open: false, editing: null })
   const [sessionModal, setSessionModal] = useState({ open: false, editing: null, monthId: null })
   const [materialModal, setMaterialModal] = useState({ open: false, editing: null, sessionId: null })
+  const [importOpen, setImportOpen] = useState(false)
 
   const load = useCallback(async () => {
     setLoading(true)
@@ -103,9 +105,14 @@ export const MaterialsTab = ({ isAdmin = false }) => {
         </select>
         <div className="flex-1" />
         {isAdmin && (
-          <Button variant="primary" size="sm" onClick={() => setMonthModal({ open: true, editing: null })} className="flex items-center gap-1.5 shrink-0">
-            <Plus size={14} /> Thêm tháng
-          </Button>
+          <>
+            <Button variant="secondary" size="sm" onClick={() => setImportOpen(true)} className="flex items-center gap-1.5 shrink-0">
+              <Upload size={14} /> Import Excel
+            </Button>
+            <Button variant="primary" size="sm" onClick={() => setMonthModal({ open: true, editing: null })} className="flex items-center gap-1.5 shrink-0">
+              <Plus size={14} /> Thêm tháng
+            </Button>
+          </>
         )}
       </div>
 
@@ -165,6 +172,12 @@ export const MaterialsTab = ({ isAdmin = false }) => {
         editingItem={materialModal.editing}
         onSave={saveMaterial}
         onDelete={deleteMaterial}
+      />
+      <ImportCurriculumModal
+        open={importOpen}
+        onClose={() => setImportOpen(false)}
+        defaultCourseType={courseType}
+        onImportDone={load}
       />
     </div>
   )

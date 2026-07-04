@@ -35,7 +35,7 @@ create table if not exists public.curriculum_materials (
   session_id uuid not null references public.curriculum_sessions(id) on delete cascade,
   type text not null check (type in ('ppt', 'handout', 'reading', 'homework', 'other')),
   title text not null,
-  url text not null,
+  url text,
   order_index int not null default 0,
   created_by uuid references public.teachers(id),
   created_at timestamptz default now()

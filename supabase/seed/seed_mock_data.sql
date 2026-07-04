@@ -38,6 +38,9 @@
 --   mock_tests      : 0f000000-0000-0000-0000-0000000000NN
 --   mock_test_results: a0000000-0000-0000-0000-0000000000NN
 --   settings        : b1000000-0000-0000-0000-0000000000NN
+--   curriculum_months   : d0000000-0000-0000-0000-0000000000NN
+--   curriculum_sessions : d1000000-0000-0000-0000-0000000000NN
+--   curriculum_materials: d2000000-0000-0000-0000-0000000000NN
 
 DROP TABLE IF EXISTS _seed_teachers;
 CREATE TEMP TABLE _seed_teachers AS

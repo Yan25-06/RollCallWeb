@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react'
 import { Modal, Input, Button, toast } from '@/components/ui'
 import { MockTestSectionBuilder } from '@/components/mock-test/MockTestSectionBuilder'
 import { DEFAULT_SKILL_CONFIG } from '@/services/classService'
+import { COURSE_TYPES } from '@/utils/courseTypes'
 
 const DAY_OPTIONS = [
   { value: 1, label: 'T2' },
@@ -24,7 +25,7 @@ export const ClassModal = ({ open, onClose, classItem = null, onSave, isAdmin = 
     name: '',
     level: '',
     maxStudents: 0,
-    courseType: 'Giao Tiếp',
+    courseType: COURSE_TYPES[0],
     scheduleDayList: [],
     startTime: '',
     endTime: '',
@@ -42,7 +43,7 @@ export const ClassModal = ({ open, onClose, classItem = null, onSave, isAdmin = 
           name: classItem.name || '',
           level: classItem.level || '',
           maxStudents: classItem.maxStudents || 0,
-          courseType: classItem.courseType || 'Giao Tiếp',
+          courseType: classItem.courseType || COURSE_TYPES[0],
           scheduleDayList: Array.isArray(classItem.scheduleDayList) ? classItem.scheduleDayList : [],
           startTime: classItem.startTime || '',
           endTime: classItem.endTime || '',
@@ -56,7 +57,7 @@ export const ClassModal = ({ open, onClose, classItem = null, onSave, isAdmin = 
           name: '',
           level: '',
           maxStudents: 0,
-          courseType: 'Giao Tiếp',
+          courseType: COURSE_TYPES[0],
           scheduleDayList: [],
           startTime: '',
           endTime: '',
@@ -173,11 +174,9 @@ export const ClassModal = ({ open, onClose, classItem = null, onSave, isAdmin = 
               onChange={handleChange}
               className="select"
             >
-              <option value="IELTS">IELTS</option>
-              <option value="TOEIC">TOEIC</option>
-              <option value="Giao Tiếp">Giao Tiếp</option>
-              <option value="Trẻ Em">Trẻ Em</option>
-              <option value="Khác">Khác</option>
+              {COURSE_TYPES.map(ct => (
+                <option key={ct} value={ct}>{ct}</option>
+              ))}
             </select>
           </div>
         </div>

@@ -7,10 +7,10 @@ import { fmtTime } from '@/utils/helpers'
 
 // ─── Color Mapping by courseType ──────────────────────────
 export const COURSE_COLORS = {
-  'IELTS':     { bg: 'bg-navy-100',   border: 'border-navy-300',   text: 'text-navy-800',   dot: 'bg-navy-500'   },
-  'TOEIC':     { bg: 'bg-teal-50',    border: 'border-teal-200',   text: 'text-teal-700',   dot: 'bg-teal-500'   },
-  'Giao Tiếp': { bg: 'bg-amber-50',   border: 'border-amber-200',  text: 'text-amber-700',  dot: 'bg-amber-500'  },
-  'default':   { bg: 'bg-gray-50',    border: 'border-gray-200',   text: 'text-gray-600',   dot: 'bg-gray-400'   },
+  'IELTS':    { bg: 'bg-navy-100', border: 'border-navy-300', text: 'text-navy-800', dot: 'bg-navy-500' },
+  'TOEIC':    { bg: 'bg-teal-50',  border: 'border-teal-200', text: 'text-teal-700', dot: 'bg-teal-500' },
+  'TOEIC SW': { bg: 'bg-amber-50', border: 'border-amber-200', text: 'text-amber-700', dot: 'bg-amber-500' },
+  'default':  { bg: 'bg-gray-50',  border: 'border-gray-200', text: 'text-gray-600', dot: 'bg-gray-400' },
 }
 
 export const getCourseColor = (courseType) =>

@@ -501,10 +501,7 @@ export const SchedulePage = ({ onNavigate }) => {
       )}
 
       {activeTab === 'materials' && (
-        <MaterialsTab
-          classes={visibleClasses}
-          isAdmin={isAdmin}
-        />
+        <MaterialsTab isAdmin={isAdmin} />
       )}
 
       {/* ── Modal ──────────────────────────────────────── */}

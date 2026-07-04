@@ -18,7 +18,7 @@ Cho phép admin import một giáo trình hoàn chỉnh (Tháng → Buổi → n
 - **Cột E** = ô gộp nhiều tài liệu, mỗi dòng dạng `Label: value`:
   - Nhãn: `PPT`, `Handout`, `Đọc dịch`, `Dictation`, `Homework` (không phân biệt hoa/thường, có thể có khoảng trắng thừa).
   - `PPT` và `Homework` thường có URL đầy đủ ngay trong text (`canva.link/...`, `forms.gle/...`, `docs.google.com/forms/...`).
-  - `Handout` và `Đọc dịch` thường chỉ là **mã code** (VD `HANDOUT-B1`, `BTB1`), không có URL trong text.
+  - `Handout` và `Đọc dịch` **có thể có URL trong text hoặc chỉ là mã code** (VD `HANDOUT-B1`, `BTB1`) — không cố định. Parser luôn trích URL trong text trước cho mọi loại; chỉ khi không có URL mới xử lý như mã code.
   - **Hyperlink ẩn của ô E** (`cell.l.Target`): khi xuất `.xlsx`, mỗi ô Excel chỉ giữ được **đúng 1 hyperlink**. Khảo sát xác nhận link còn lại luôn ứng với mục **Handout** (VD Buổi 1 → Google Doc; Buổi 4 có `.pdf` → Google Drive file). Khi ô Handout rỗng, hyperlink ẩn đôi khi **trùng với link PPT** → phải bỏ qua trong trường hợp đó.
 - **Cột F** = ghi chú buổi dạy (nhận xét nội bộ). **Cột G** = "Yêu cầu tạo bản copy...", thỉnh thoảng chứa nội dung Mini Test kèm hyperlink ẩn. **Cột H** = ghi chú lẻ (hiếm).
 - Các buổi cuối (29–36) có ô tài liệu **rỗng hoàn toàn** (`PPT:\nHandout:\n...`) → không tạo tài liệu nào, không báo lỗi.
@@ -30,7 +30,7 @@ Cho phép admin import một giáo trình hoàn chỉnh (Tháng → Buổi → n
 
 | Vấn đề | Quyết định |
 |---|---|
-| "Đọc dịch"/"Dictation" chỉ có mã code, không link | **Vẫn tạo tài liệu**, `url` để trống (NULL). Cần nới ràng buộc `url NOT NULL`. |
+| "Đọc dịch"/"Dictation" có thể có URL hoặc chỉ là mã code | Nếu có URL trong text → dùng URL. Nếu chỉ có mã code → **vẫn tạo tài liệu**, `url` để trống (NULL). Cần nới ràng buộc `url NOT NULL`. |
 | Nhãn "Dictation" | Map type `reading` (giống "Đọc dịch"). |
 | Cột G (Mini Test + link ẩn) | **Gộp text vào `note` của buổi**, bỏ qua hyperlink ẩn trong G. Không tạo tài liệu riêng. |
 | courseType đích của file này | **TOEIC** (mặc định gợi ý trong modal). |

@@ -187,6 +187,20 @@ const MonthBlock = ({
     return [...map.entries()]  // [[weekNo|'—', sessions[]]]
   }, [month.sessions])
 
+  // Xóa tháng: click lần 1 "vũ trang" xác nhận, click lần 2 mới thực sự xóa
+  // (cascade xóa toàn bộ buổi + tài liệu trong tháng, cần chắc chắn trước khi xóa)
+  const [confirmDelete, setConfirmDelete] = useState(false)
+  useEffect(() => {
+    if (!confirmDelete) return
+    const t = setTimeout(() => setConfirmDelete(false), 3000)
+    return () => clearTimeout(t)
+  }, [confirmDelete])
+  const handleDeleteClick = () => {
+    if (!confirmDelete) { setConfirmDelete(true); return }
+    setConfirmDelete(false)
+    onDeleteMonth()
+  }
+
   return (
     <div className="bg-white rounded-2xl border border-navy-100 shadow-navy-sm overflow-hidden">
       {/* Header tháng */}
@@ -205,7 +219,14 @@ const MonthBlock = ({
             <button onClick={onEditMonth} className="p-1.5 rounded-lg text-navy-400 hover:text-navy-700 hover:bg-navy-100 transition-colors" title="Sửa tháng">
               <Pencil size={14} />
             </button>
-            <button onClick={onDeleteMonth} className="p-1.5 rounded-lg text-navy-400 hover:text-red-600 hover:bg-red-50 transition-colors" title="Xóa tháng">
+            <button
+              onClick={handleDeleteClick}
+              className={clsx(
+                'p-1.5 rounded-lg transition-colors',
+                confirmDelete ? 'text-white bg-red-600 hover:bg-red-700' : 'text-navy-400 hover:text-red-600 hover:bg-red-50'
+              )}
+              title={confirmDelete ? 'Xác nhận xóa? Bấm lại để xóa cả tháng (kèm buổi + tài liệu)' : 'Xóa tháng'}
+            >
               <Trash2 size={14} />
             </button>
           </div>
@@ -242,58 +263,101 @@ const MonthBlock = ({
 }
 
 // ── SessionCard: 1 buổi + danh sách tài liệu ───────────────────
-const SessionCard = ({ session, isAdmin, onEdit, onDelete, onAddMaterial, onEditMaterial, onDeleteMaterial }) => (
-  <div className="rounded-xl border border-navy-100 p-3">
-    <div className="flex items-start gap-2">
-      <span className="text-xs font-semibold px-2 py-0.5 rounded-md bg-navy-100 text-navy-800 shrink-0">Buổi {session.sessionNo}</span>
-      {session.skill && (
-        <span className="text-xs font-medium px-2 py-0.5 rounded-md bg-teal-50 text-teal-700 shrink-0">{session.skill}</span>
-      )}
-      <div className="flex-1" />
-      {isAdmin && (
-        <div className="flex items-center gap-1 shrink-0">
-          <button onClick={onAddMaterial} className="p-1 rounded-lg text-navy-400 hover:text-navy-700 hover:bg-navy-50 transition-colors" title="Thêm tài liệu">
-            <Plus size={14} />
-          </button>
-          <button onClick={onEdit} className="p-1 rounded-lg text-navy-400 hover:text-navy-700 hover:bg-navy-50 transition-colors" title="Sửa buổi">
-            <Pencil size={13} />
-          </button>
-          <button onClick={onDelete} className="p-1 rounded-lg text-navy-400 hover:text-red-600 hover:bg-red-50 transition-colors" title="Xóa buổi">
-            <Trash2 size={13} />
-          </button>
-        </div>
+const SessionCard = ({ session, isAdmin, onEdit, onDelete, onAddMaterial, onEditMaterial, onDeleteMaterial }) => {
+  // Xóa buổi: click lần 1 "vũ trang" xác nhận, click lần 2 mới thực sự xóa (cascade tài liệu trong buổi)
+  const [confirmDelete, setConfirmDelete] = useState(false)
+  useEffect(() => {
+    if (!confirmDelete) return
+    const t = setTimeout(() => setConfirmDelete(false), 3000)
+    return () => clearTimeout(t)
+  }, [confirmDelete])
+  const handleDeleteClick = () => {
+    if (!confirmDelete) { setConfirmDelete(true); return }
+    setConfirmDelete(false)
+    onDelete()
+  }
+
+  // Xóa tài liệu: cùng cơ chế 2 bước, theo dõi id tài liệu đang "vũ trang"
+  const [confirmDeleteMaterialId, setConfirmDeleteMaterialId] = useState(null)
+  useEffect(() => {
+    if (!confirmDeleteMaterialId) return
+    const t = setTimeout(() => setConfirmDeleteMaterialId(null), 3000)
+    return () => clearTimeout(t)
+  }, [confirmDeleteMaterialId])
+  const handleDeleteMaterialClick = (m) => {
+    if (confirmDeleteMaterialId !== m.id) { setConfirmDeleteMaterialId(m.id); return }
+    setConfirmDeleteMaterialId(null)
+    onDeleteMaterial(m)
+  }
+
+  return (
+    <div className="rounded-xl border border-navy-100 p-3">
+      <div className="flex items-start gap-2">
+        <span className="text-xs font-semibold px-2 py-0.5 rounded-md bg-navy-100 text-navy-800 shrink-0">Buổi {session.sessionNo}</span>
+        {session.skill && (
+          <span className="text-xs font-medium px-2 py-0.5 rounded-md bg-teal-50 text-teal-700 shrink-0">{session.skill}</span>
+        )}
+        <div className="flex-1" />
+        {isAdmin && (
+          <div className="flex items-center gap-1 shrink-0">
+            <button onClick={onAddMaterial} className="p-1 rounded-lg text-navy-400 hover:text-navy-700 hover:bg-navy-50 transition-colors" title="Thêm tài liệu">
+              <Plus size={14} />
+            </button>
+            <button onClick={onEdit} className="p-1 rounded-lg text-navy-400 hover:text-navy-700 hover:bg-navy-50 transition-colors" title="Sửa buổi">
+              <Pencil size={13} />
+            </button>
+            <button
+              onClick={handleDeleteClick}
+              className={clsx(
+                'p-1 rounded-lg transition-colors',
+                confirmDelete ? 'text-white bg-red-600 hover:bg-red-700' : 'text-navy-400 hover:text-red-600 hover:bg-red-50'
+              )}
+              title={confirmDelete ? 'Xác nhận xóa? Bấm lại để xóa buổi (kèm tài liệu)' : 'Xóa buổi'}
+            >
+              <Trash2 size={13} />
+            </button>
+          </div>
+        )}
+      </div>
+
+      {session.content && <p className="text-sm text-navy-700 mt-1.5 whitespace-pre-wrap">{session.content}</p>}
+      {session.note && <p className="text-xs text-navy-400 mt-1 italic">Ghi chú: {session.note}</p>}
+
+      {/* Danh sách tài liệu */}
+      {session.materials.length > 0 && (
+        <ul className="flex flex-col gap-1.5 mt-2.5">
+          {session.materials.map(m => {
+            const t = getMaterialType(m.type)
+            const armed = confirmDeleteMaterialId === m.id
+            return (
+              <li key={m.id} className="flex items-center gap-2">
+                <span className={clsx('text-xs font-medium px-2 py-0.5 rounded-md shrink-0', t.badge)}>{t.label}</span>
+                <a href={m.url} target="_blank" rel="noopener noreferrer" className="flex items-center gap-1 text-sm text-navy-800 hover:text-navy-600 hover:underline min-w-0">
+                  <span className="truncate">{m.title}</span>
+                  <ExternalLink size={12} className="shrink-0 text-navy-400" />
+                </a>
+                {isAdmin && (
+                  <div className="flex items-center gap-0.5 shrink-0 ml-auto">
+                    <button onClick={() => onEditMaterial(m)} className="p-1 rounded-lg text-navy-400 hover:text-navy-700 hover:bg-navy-50 transition-colors" title="Sửa">
+                      <Pencil size={12} />
+                    </button>
+                    <button
+                      onClick={() => handleDeleteMaterialClick(m)}
+                      className={clsx(
+                        'p-1 rounded-lg transition-colors',
+                        armed ? 'text-white bg-red-600 hover:bg-red-700' : 'text-navy-400 hover:text-red-600 hover:bg-red-50'
+                      )}
+                      title={armed ? 'Xác nhận xóa?' : 'Xóa'}
+                    >
+                      <Trash2 size={12} />
+                    </button>
+                  </div>
+                )}
+              </li>
+            )
+          })}
+        </ul>
       )}
     </div>
-
-    {session.content && <p className="text-sm text-navy-700 mt-1.5 whitespace-pre-wrap">{session.content}</p>}
-    {session.note && <p className="text-xs text-navy-400 mt-1 italic">Ghi chú: {session.note}</p>}
-
-    {/* Danh sách tài liệu */}
-    {session.materials.length > 0 && (
-      <ul className="flex flex-col gap-1.5 mt-2.5">
-        {session.materials.map(m => {
-          const t = getMaterialType(m.type)
-          return (
-            <li key={m.id} className="flex items-center gap-2">
-              <span className={clsx('text-xs font-medium px-2 py-0.5 rounded-md shrink-0', t.badge)}>{t.label}</span>
-              <a href={m.url} target="_blank" rel="noopener noreferrer" className="flex items-center gap-1 text-sm text-navy-800 hover:text-navy-600 hover:underline min-w-0">
-                <span className="truncate">{m.title}</span>
-                <ExternalLink size={12} className="shrink-0 text-navy-400" />
-              </a>
-              {isAdmin && (
-                <div className="flex items-center gap-0.5 shrink-0 ml-auto">
-                  <button onClick={() => onEditMaterial(m)} className="p-1 rounded-lg text-navy-400 hover:text-navy-700 hover:bg-navy-50 transition-colors" title="Sửa">
-                    <Pencil size={12} />
-                  </button>
-                  <button onClick={() => onDeleteMaterial(m)} className="p-1 rounded-lg text-navy-400 hover:text-red-600 hover:bg-red-50 transition-colors" title="Xóa">
-                    <Trash2 size={12} />
-                  </button>
-                </div>
-              )}
-            </li>
-          )
-        })}
-      </ul>
-    )}
-  </div>
-)
+  )
+}

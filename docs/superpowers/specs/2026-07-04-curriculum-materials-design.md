@@ -15,8 +15,11 @@ Nội dung giảng dạy chi tiết, và các slot tài liệu PPT/Handout/Đọ
 ## Quyết định đã chốt
 
 1. **Không tích hợp Google Sheet** — nhập tay trên web bằng UI mới. Sheet chỉ là mẫu tham khảo cấu trúc.
-2. **Giáo trình dùng chung theo `courseType`** (TOEIC / IELTS / Giao Tiếp / Trẻ Em / Khác), KHÔNG per-lớp.
+2. **Giáo trình dùng chung theo `courseType`**, KHÔNG per-lớp.
    "Buổi 1..N" là số thứ tự bài học theo giáo trình, không phải ngày dạy cụ thể của một lớp.
+   **courseType là hằng số dùng chung cho cả web** — gom về `COURSE_TYPES = ['IELTS','TOEIC','TOEIC SW','KHÁC']`
+   ở `src/utils/courseTypes.js`, dùng chung bởi `ClassModal` (dropdown lớp), tab Giáo trình, và map màu.
+   Danh sách cũ ('Giao Tiếp'/'Trẻ Em') bị thay; giá trị cũ còn trong DB rơi về màu/nhãn mặc định (chấp nhận).
 3. **Mỗi buổi lưu:** Kỹ năng, Nội dung giảng dạy chi tiết, Ghi chú, và danh sách tài liệu. Nhóm theo Tháng/Tuần.
 4. **Loại tài liệu:** PPT / Handout / Đọc dịch / Homework / Khác.
 5. **Tài liệu = chữ hiển thị + link** (vd title "HANDOUT-B1" gắn URL). Link vẫn bắt buộc (mô hình `title + url` sẵn có).
@@ -30,7 +33,7 @@ Nội dung giảng dạy chi tiết, và các slot tài liệu PPT/Handout/Đọ
 | cột | kiểu | ghi chú |
 |---|---|---|
 | `id` | uuid PK | |
-| `course_type` | text NOT NULL | 'IELTS' \| 'TOEIC' \| 'Giao Tiếp' \| 'Trẻ Em' \| 'Khác' |
+| `course_type` | text NOT NULL | 'IELTS' \| 'TOEIC' \| 'TOEIC SW' \| 'KHÁC' \|
 | `month_no` | int NOT NULL | số thứ tự tháng trong khóa |
 | `title` | text | tiêu đề chủ đề của tháng (vd "XÂY DỰNG NỀN TẢNG...") |
 | `created_by` | uuid FK teachers | gắn qua `getUid()` |

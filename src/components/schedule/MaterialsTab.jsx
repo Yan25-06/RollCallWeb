@@ -23,6 +23,7 @@ export const MaterialsTab = ({ isAdmin = false }) => {
   const [selectedSessionId, setSelectedSessionId] = useState(null)
   const [configOpen, setConfigOpen] = useState(false)
   const cacheRef = useRef(new Map())               // courseType → tree (cache trong phiên)
+  const requestIdRef = useRef(0)                   // stamp mỗi lần gọi load() để bỏ qua phản hồi cũ (đổi courseType nhanh)
 
   const sheetUrl = sheetMap?.[courseType] || null
 
@@ -40,24 +41,30 @@ export const MaterialsTab = ({ isAdmin = false }) => {
 
   // Nạp giáo trình từ Google Sheet (cache theo courseType, force = nút Làm mới)
   const load = useCallback(async (force = false) => {
-    if (!sheetUrl) { setTree([]); setError(null); return }
+    // Stamp request này — nếu courseType đổi trước khi await xong, requestIdRef.current
+    // đã bị lần gọi load() mới ghi đè, nên so sánh lại requestId cho biết response còn "mới" hay không.
+    const requestId = ++requestIdRef.current
+    if (!sheetUrl) { setTree([]); setError(null); setLoading(false); return }
     if (!force && cacheRef.current.has(courseType)) {
       setTree(cacheRef.current.get(courseType))
       setError(null)
+      setLoading(false)
       return
     }
     setLoading(true)
     setError(null)
     try {
       const { tree: t, warnings } = await googleSheetCurriculumService.fetchCurriculum(sheetUrl)
+      if (requestId !== requestIdRef.current) return // đã có lần gọi load() mới hơn — bỏ qua kết quả cũ
       cacheRef.current.set(courseType, t)
       setTree(t)
       if (warnings.length > 0) toast.info(`${warnings.length} dòng trong Sheet bị bỏ qua (sai định dạng)`)
     } catch (e) {
+      if (requestId !== requestIdRef.current) return
       setTree([])
       setError(e.message || 'Không thể tải giáo trình')
     } finally {
-      setLoading(false)
+      if (requestId === requestIdRef.current) setLoading(false)
     }
   }, [courseType, sheetUrl])
 

@@ -46,7 +46,7 @@ Mỗi service là một object với method `getAll / getById / create / update 
 - **UI không gọi `supabase.*` trực tiếp** — luôn qua service (trừ auth trong `useAuth.jsx`).
 - **`classService` hỗ trợ admin**: `create()` và `update()` chấp nhận `data.teacherId` tường minh để admin gán/đổi giáo viên phụ trách.
 
-Services đã có: `studentService`, `classService` (+`teacherService`), `enrollmentService`, `sessionService`, `attendanceService`, `teacherAttendanceService`, `homeworkService`, `hwAssignmentService`, `submissionService`, `scheduleService`, `feeService`, `paymentService`, `reviewService`, `sessionReviewService`, `generalCommentService`, `mockTestService`, `mockTestResultService`, `settingsService`, `curriculumService`. (`classMaterialService` vẫn còn file nhưng **orphan** — không còn UI import, xem "Model tài liệu giảng dạy CŨ" bên dưới.)
+Services đã có: `studentService`, `classService` (+`teacherService`), `enrollmentService`, `sessionService`, `attendanceService`, `teacherAttendanceService`, `homeworkService`, `hwAssignmentService`, `submissionService`, `scheduleService`, `feeService`, `paymentService`, `reviewService`, `sessionReviewService`, `generalCommentService`, `mockTestService`, `mockTestResultService`, `settingsService`, `curriculumSheetService`, `googleSheetCurriculumService`. (`classMaterialService` và `curriculumService` vẫn còn file nhưng **orphan** — không còn UI import, xem "Model tài liệu giảng dạy CŨ" và "Model giáo trình dùng chung — DB CRUD CŨ" bên dưới.)
 
 ### Trạng thái migration theo trang
 - ✅ **Tất cả trang đã dùng services.** `src/store/db.js` và `src/store/mockTestExport.js` đã bị xóa (cutover hoàn tất, 2026-06-02).

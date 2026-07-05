@@ -225,7 +225,7 @@ export const ImportCurriculumModal = ({ open, onClose, defaultCourseType = COURS
                     {parsed.months.length} tháng · {totalSessions} buổi · {totalMaterials} tài liệu
                   </p>
                 </div>
-                <div className="flex flex-col gap-2 max-h-72 overflow-y-auto">
+                <div className="flex flex-col gap-2">
                   {parsed.months.map(month => {
                     const matCount = month.sessions.reduce((s, x) => s + x.materials.length, 0)
                     const isOpen = expanded.has(month.monthNo)

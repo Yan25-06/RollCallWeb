@@ -1,4 +1,4 @@
-// Loại tài liệu giảng dạy — dùng chung bởi MaterialsTab và MaterialModal.
+// Loại tài liệu giảng dạy — dùng bởi SessionDetailPanel để hiển thị badge màu.
 export const MATERIAL_TYPES = [
   { value: 'ppt',      label: 'PPT',       badge: 'bg-blue-100 text-blue-700' },
   { value: 'handout',  label: 'Handout',   badge: 'bg-green-100 text-green-700' },

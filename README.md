@@ -26,6 +26,7 @@ Password: 123456
 - **Schedule** — weekly grid + daily agenda view; teacher attendance check-in with 3-state opt-in model (unconfirmed / present / absent) per slot; teachers self-confirm their own classes
 - **Lịch dạy tự động** — đặt lịch học của lớp (chọn thứ + giờ) → các ca tự xuất hiện và đồng bộ trên trang Lịch Dạy
 - **Chấm công giáo viên opt-in** — 3 trạng thái: Chưa xác nhận / Đã dạy / Vắng. Giáo viên tự chấm buổi lớp mình; admin chấm tất cả và gán dạy thay. Dạy thay tự xác nhận qua mục "Buổi được giao dạy thay".
+- **Giáo trình & tài liệu giảng dạy** — giáo trình dùng chung theo loại khóa (IELTS/TOEIC/TOEIC SW/Khác), phân cấp Tháng → Buổi → Tài liệu; admin biên soạn, mọi giáo viên xem read-only qua dropdown chọn loại khóa (không giới hạn theo lớp mình dạy).
 - **Reports** — attendance, fees, homework, and mock test charts with Excel/PDF export
 - **Lương giáo viên & dạy thay** — Admin đặt lương tháng trong Admin Panel. Tab "Bảng Lương" tính lương theo số buổi đã dạy (status='present') + dạy thay đã xác nhận; hỗ trợ export Excel. Cột "Chưa XN" hiển thị buổi chưa bấm xác nhận.
 - **Multi-teacher + admin** — teachers see only their own data; admin manages all classes and teachers

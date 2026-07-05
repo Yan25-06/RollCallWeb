@@ -38,6 +38,9 @@
 --   mock_tests      : 0f000000-0000-0000-0000-0000000000NN
 --   mock_test_results: a0000000-0000-0000-0000-0000000000NN
 --   settings        : b1000000-0000-0000-0000-0000000000NN
+--   curriculum_months   : d0000000-0000-0000-0000-0000000000NN
+--   curriculum_sessions : d1000000-0000-0000-0000-0000000000NN
+--   curriculum_materials: d2000000-0000-0000-0000-0000000000NN
 
 DROP TABLE IF EXISTS _seed_teachers;
 CREATE TEMP TABLE _seed_teachers AS
@@ -1093,6 +1096,36 @@ VALUES
    'https://drive.google.com/file/d/mock-speaking',
    'speaking',
    (SELECT t1 FROM _seed_teachers));
+
+-- ====================================================
+-- BƯỚC 17c : Giáo trình mẫu (curriculum_months/sessions/materials)
+-- ====================================================
+-- Giáo trình dùng CHUNG theo course_type (không gắn teacher_id) nên cleanup
+-- scope theo course_type + month_no thay vì theo teacher mock.
+-- UUID prefix: months d0000000-..., sessions d1000000-..., materials d2000000-...
+DELETE FROM public.curriculum_months WHERE course_type = 'IELTS' AND month_no = 1;
+
+WITH m AS (
+  INSERT INTO public.curriculum_months (id, course_type, month_no, title, created_by)
+  VALUES (
+    'd0000000-0000-0000-0000-000000000001',
+    'IELTS', 1, 'XÂY DỰNG NỀN TẢNG CƠ BẢN',
+    (SELECT ta FROM _seed_teachers)
+  )
+  RETURNING id
+), s1 AS (
+  INSERT INTO public.curriculum_sessions (id, month_id, week_no, session_no, skill, content, note, created_by)
+  SELECT
+    'd1000000-0000-0000-0000-000000000001', m.id, 1, 1,
+    'Reading', 'Khởi động: từ loại, cụm từ & mệnh đề. Paraphrasing.', NULL,
+    (SELECT ta FROM _seed_teachers)
+  FROM m
+  RETURNING id
+)
+INSERT INTO public.curriculum_materials (id, session_id, type, title, url, order_index, created_by)
+SELECT 'd2000000-0000-0000-0000-000000000001', s1.id, 'ppt', 'Slide Unit 1', 'https://example.com/slide1', 0, (SELECT ta FROM _seed_teachers) FROM s1
+UNION ALL
+SELECT 'd2000000-0000-0000-0000-000000000002', s1.id, 'homework', 'Homework Unit 1', 'https://forms.gle/example1', 1, (SELECT ta FROM _seed_teachers) FROM s1;
 
 -- ====================================================
 -- BƯỚC 18 : Verification — đếm row đã seed

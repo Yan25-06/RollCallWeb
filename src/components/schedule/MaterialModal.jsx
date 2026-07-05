@@ -3,7 +3,7 @@ import { Modal, Button, Input, Select } from '@/components/ui'
 import { Trash2 } from 'lucide-react'
 import { MATERIAL_TYPES } from './materialType'
 
-const EMPTY_FORM = { title: '', url: '', type: 'slide' }
+const EMPTY_FORM = { title: '', url: '', type: 'ppt' }
 
 /**
  * MaterialModal — thêm/sửa tài liệu giảng dạy
@@ -25,7 +25,7 @@ export const MaterialModal = ({ open, onClose, editingItem, onSave, onDelete }) 
         setForm({
           title: editingItem.title ?? '',
           url:   editingItem.url ?? '',
-          type:  editingItem.type ?? 'slide',
+          type:  editingItem.type ?? 'ppt',
         })
       } else {
         setForm(EMPTY_FORM)

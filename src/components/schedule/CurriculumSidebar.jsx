@@ -45,17 +45,19 @@ export const CurriculumSidebar = ({
         return (
           <div key={month.id}>
             {/* Header tháng */}
-            <div
-              className="flex items-center gap-1.5 rounded-lg bg-gradient-to-r from-navy-900 to-navy-800 px-2.5 py-2 text-white cursor-pointer select-none"
-              onClick={() => toggle(month.id)}
-            >
-              {collapsed ? <ChevronRight size={14} className="shrink-0" /> : <ChevronDown size={14} className="shrink-0" />}
-              <span className="text-sm font-bold min-w-0 truncate">
-                Tháng {month.monthNo}{month.title ? ` · ${month.title}` : ''}
-              </span>
-              <span className="ml-auto text-[11px] text-navy-300 shrink-0">{month.sessions.length} buổi</span>
+            <div className="flex items-center gap-1.5 rounded-lg bg-gradient-to-r from-navy-900 to-navy-800 px-2.5 py-2 text-white">
+              <button
+                onClick={() => toggle(month.id)}
+                className="flex flex-1 items-center gap-1.5 min-w-0 text-left cursor-pointer"
+              >
+                {collapsed ? <ChevronRight size={14} className="shrink-0" /> : <ChevronDown size={14} className="shrink-0" />}
+                <span className="text-sm font-bold min-w-0 truncate">
+                  Tháng {month.monthNo}{month.title ? ` · ${month.title}` : ''}
+                </span>
+              </button>
+              <span className="text-[11px] text-navy-300 shrink-0">{month.sessions.length} buổi</span>
               {isAdmin && (
-                <span className="flex items-center gap-0.5 shrink-0" onClick={e => e.stopPropagation()}>
+                <span className="flex items-center gap-0.5 shrink-0">
                   <button onClick={() => onAddSession(month.id)} className="p-1 rounded-md text-navy-300 hover:text-white hover:bg-white/10 transition-colors" title="Thêm buổi">
                     <Plus size={13} />
                   </button>
@@ -80,7 +82,7 @@ export const CurriculumSidebar = ({
             {!collapsed && (
               <div className="flex flex-col gap-0.5 py-1.5 pl-2">
                 {month.sessions.length === 0 ? (
-                  <p className="text-xs text-navy-400 px-2 py-1.5">Chưa có buổi nào.</p>
+                  <p className="text-xs text-navy-500 px-2 py-1.5">Chưa có buổi nào.</p>
                 ) : groupByWeek(month.sessions).map(([weekKey, sessions]) => (
                   <div key={weekKey} className="flex flex-col gap-0.5">
                     {weekKey !== '—' && (

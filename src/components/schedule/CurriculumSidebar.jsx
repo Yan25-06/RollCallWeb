@@ -39,6 +39,15 @@ export const CurriculumSidebar = ({
     return next
   })
 
+  // Set khóa "monthId::weekKey" các tuần đang bị thu gọn. Mặc định mọi tuần mở (giữ hành vi cũ).
+  const [closedWeeks, setClosedWeeks] = useState(() => new Set())
+  const toggleWeek = (weekId) => setClosedWeeks(prev => {
+    const next = new Set(prev)
+    if (next.has(weekId)) next.delete(weekId)
+    else next.add(weekId)
+    return next
+  })
+
   const monthDel = useArmedDelete()
 
   return (
@@ -87,41 +96,51 @@ export const CurriculumSidebar = ({
               <div className="flex flex-col gap-0.5 py-1.5 pl-2">
                 {month.sessions.length === 0 ? (
                   <p className="text-xs text-navy-500 px-2 py-1.5">Chưa có buổi nào.</p>
-                ) : groupByWeek(month.sessions).map(([weekKey, sessions]) => (
-                  <div key={weekKey} className="flex flex-col gap-0.5">
-                    {weekKey !== '—' && (
-                      <p className="text-[10px] font-semibold uppercase tracking-wide text-navy-500 px-2 pt-1.5">Tuần {weekKey}</p>
-                    )}
-                    {sessions.map(s => {
-                      const active = s.id === selectedSessionId
-                      return (
+                ) : groupByWeek(month.sessions).map(([weekKey, sessions]) => {
+                  const weekId = `${month.id}::${weekKey}`
+                  const weekCollapsed = weekKey !== '—' && closedWeeks.has(weekId)
+                  return (
+                    <div key={weekKey} className="flex flex-col gap-0.5">
+                      {weekKey !== '—' && (
                         <button
-                          key={s.id}
-                          onClick={() => onSelectSession(s.id)}
-                          className={clsx(
-                            'flex items-center gap-2 rounded-lg px-2 py-1.5 text-left transition-colors border-l-[3px]',
-                            active
-                              ? 'bg-navy-50 border-navy-800'
-                              : 'border-transparent hover:bg-navy-50/60'
-                          )}
+                          onClick={() => toggleWeek(weekId)}
+                          className="flex items-center gap-1 px-2 pt-1.5 text-left"
                         >
-                          <span className={clsx(
-                            'text-[11px] font-semibold px-1.5 py-0.5 rounded shrink-0',
-                            active ? 'bg-navy-800 text-white' : 'bg-navy-50 text-navy-700'
-                          )}>
-                            B{s.sessionNo}
-                          </span>
-                          <span className={clsx(
-                            'text-xs min-w-0 truncate',
-                            active ? 'font-semibold text-navy-900' : 'text-navy-500'
-                          )}>
-                            {sessionLabel(s)}
-                          </span>
+                          {weekCollapsed ? <ChevronRight size={11} className="shrink-0 text-navy-400" /> : <ChevronDown size={11} className="shrink-0 text-navy-400" />}
+                          <span className="text-[10px] font-semibold uppercase tracking-wide text-navy-500">Tuần {weekKey}</span>
                         </button>
-                      )
-                    })}
-                  </div>
-                ))}
+                      )}
+                      {!weekCollapsed && sessions.map(s => {
+                        const active = s.id === selectedSessionId
+                        return (
+                          <button
+                            key={s.id}
+                            onClick={() => onSelectSession(s.id)}
+                            className={clsx(
+                              'flex items-center gap-2 rounded-lg px-2 py-1.5 text-left transition-colors border-l-[3px]',
+                              active
+                                ? 'bg-navy-50 border-navy-800'
+                                : 'border-transparent hover:bg-navy-50/60'
+                            )}
+                          >
+                            <span className={clsx(
+                              'text-[11px] font-semibold px-1.5 py-0.5 rounded shrink-0',
+                              active ? 'bg-navy-800 text-white' : 'bg-navy-50 text-navy-700'
+                            )}>
+                              B{s.sessionNo}
+                            </span>
+                            <span className={clsx(
+                              'text-xs min-w-0 truncate',
+                              active ? 'font-semibold text-navy-900' : 'text-navy-500'
+                            )}>
+                              {sessionLabel(s)}
+                            </span>
+                          </button>
+                        )
+                      })}
+                    </div>
+                  )
+                })}
               </div>
             )}
           </div>

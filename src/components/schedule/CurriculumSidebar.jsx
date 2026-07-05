@@ -26,12 +26,16 @@ export const CurriculumSidebar = ({
   tree, selectedSessionId, isAdmin,
   onSelectSession, onAddSession, onEditMonth, onDeleteMonth,
 }) => {
-  // Mặc định: tháng đầu (index 0) mở, còn lại đóng. `toggled` chứa id các tháng bị lật khỏi mặc định.
-  const [toggled, setToggled] = useState(() => new Set())
-  const isCollapsed = (monthId, idx) => (toggled.has(monthId) ? idx === 0 : idx !== 0)
-  const toggle = (monthId) => setToggled(prev => {
+  // Set id các tháng đang mở. Seed: tháng đầu tiên có buổi (fallback tháng đầu).
+  // Parent remount bằng key={courseType} nên seed lại khi đổi giáo trình.
+  const [openIds, setOpenIds] = useState(() => {
+    const first = tree.find(m => m.sessions.length > 0) ?? tree[0]
+    return new Set(first ? [first.id] : [])
+  })
+  const toggle = (monthId) => setOpenIds(prev => {
     const next = new Set(prev)
-    next.has(monthId) ? next.delete(monthId) : next.add(monthId)
+    if (next.has(monthId)) next.delete(monthId)
+    else next.add(monthId)
     return next
   })
 
@@ -39,8 +43,8 @@ export const CurriculumSidebar = ({
 
   return (
     <div className="w-full lg:w-72 shrink-0 bg-white rounded-2xl border border-navy-100 shadow-navy-sm p-2 flex flex-col gap-1.5">
-      {tree.map((month, idx) => {
-        const collapsed = isCollapsed(month.id, idx)
+      {tree.map(month => {
+        const collapsed = !openIds.has(month.id)
         const armed = monthDel.armedId === month.id
         return (
           <div key={month.id}>

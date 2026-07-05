@@ -2,7 +2,7 @@
 // Thuần (không import gì) → test bằng Node: node scripts/test-googlesheet-grid.mjs
 
 export function extractSpreadsheetId(url) {
-  const m = String(url || '').match(/\/spreadsheets\/d\/([a-zA-Z0-9_-]+)/)
+  const m = String(url || '').match(/\/spreadsheets\/(?:u\/\d+\/)?d\/([a-zA-Z0-9_-]+)/)
   return m ? m[1] : null
 }
 
@@ -27,13 +27,13 @@ export function apiRowsToGrid(rowData = []) {
 // Gắn id tổng hợp (ổn định trong phiên) để UI dùng làm key/selectedSessionId —
 // dữ liệu từ Sheet không có id như DB.
 export function attachIds(months) {
-  return months.map(m => ({
-    id: `m${m.monthNo}`,
+  return months.map((m, mi) => ({
+    id: `m${mi}`,
     ...m,
     sessions: m.sessions.map((s, si) => ({
-      id: `m${m.monthNo}-s${si}`,
+      id: `m${mi}-s${si}`,
       ...s,
-      materials: s.materials.map((t, ti) => ({ id: `m${m.monthNo}-s${si}-t${ti}`, ...t })),
+      materials: s.materials.map((t, ti) => ({ id: `m${mi}-s${si}-t${ti}`, ...t })),
     })),
   }))
 }

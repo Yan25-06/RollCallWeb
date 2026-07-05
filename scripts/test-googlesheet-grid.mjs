@@ -16,6 +16,12 @@ test('extractSpreadsheetId trả null khi link sai', () => {
   assert.equal(extractSpreadsheetId(''), null)
   assert.equal(extractSpreadsheetId(null), null)
 })
+test('extractSpreadsheetId lấy id từ URL có /u/n/ (nhiều tài khoản Google)', () => {
+  assert.equal(
+    extractSpreadsheetId('https://docs.google.com/spreadsheets/u/1/d/1AbC-xYz_123/edit#gid=0'),
+    '1AbC-xYz_123',
+  )
+})
 
 // ── apiRowsToGrid ──
 test('apiRowsToGrid map formattedValue + hyperlink của ô', () => {
@@ -52,12 +58,23 @@ test('attachIds gắn id ổn định cho tháng/buổi/tài liệu', () => {
     }],
   }]
   const tree = attachIds(months)
-  assert.equal(tree[0].id, 'm2')
-  assert.equal(tree[0].sessions[0].id, 'm2-s0')
-  assert.equal(tree[0].sessions[0].materials[0].id, 'm2-s0-t0')
+  assert.equal(tree[0].id, 'm0')
+  assert.equal(tree[0].sessions[0].id, 'm0-s0')
+  assert.equal(tree[0].sessions[0].materials[0].id, 'm0-s0-t0')
   // Giữ nguyên field gốc
   assert.equal(tree[0].sessions[0].sessionNo, 3)
   assert.equal(tree[0].sessions[0].materials[0].url, 'https://a.com')
+})
+test('attachIds không trùng id khi 2 tháng có cùng monthNo (lỗi nhập liệu trên Sheet)', () => {
+  const months = [
+    { monthNo: 2, title: 'CHỦ ĐỀ A', sessions: [{ sessionNo: 1, materials: [] }] },
+    { monthNo: 2, title: 'CHỦ ĐỀ B (trùng số tháng)', sessions: [{ sessionNo: 1, materials: [] }] },
+  ]
+  const tree = attachIds(months)
+  assert.notEqual(tree[0].id, tree[1].id)
+  assert.equal(tree[0].id, 'm0')
+  assert.equal(tree[1].id, 'm1')
+  assert.notEqual(tree[0].sessions[0].id, tree[1].sessions[0].id)
 })
 
 console.log(`\n${passed} tests passed ✓`)

@@ -26,7 +26,7 @@ Password: 123456
 - **Schedule** — weekly grid + daily agenda view; teacher attendance check-in with 3-state opt-in model (unconfirmed / present / absent) per slot; teachers self-confirm their own classes
 - **Lịch dạy tự động** — đặt lịch học của lớp (chọn thứ + giờ) → các ca tự xuất hiện và đồng bộ trên trang Lịch Dạy
 - **Chấm công giáo viên opt-in** — 3 trạng thái: Chưa xác nhận / Đã dạy / Vắng. Giáo viên tự chấm buổi lớp mình; admin chấm tất cả và gán dạy thay. Dạy thay tự xác nhận qua mục "Buổi được giao dạy thay".
-- **Giáo trình & tài liệu giảng dạy** — giáo trình dùng chung theo loại khóa (IELTS/TOEIC/TOEIC SW/Khác), phân cấp Tháng → Buổi → Tài liệu; admin biên soạn, mọi giáo viên xem read-only qua dropdown chọn loại khóa (không giới hạn theo lớp mình dạy).
+- **Giáo trình & tài liệu giảng dạy** — giáo trình dùng chung theo loại khóa (IELTS/TOEIC/TOEIC SW/Khác), đọc trực tiếp từ một file Google Sheet do admin cấu hình cho mỗi loại khóa (Sheet là nguồn nội dung, chỉnh sửa trực tiếp trên Sheet); mọi giáo viên xem read-only trong app qua dropdown chọn loại khóa.
 - **Reports** — attendance, fees, homework, and mock test charts with Excel/PDF export
 - **Lương giáo viên & dạy thay** — Admin đặt lương tháng trong Admin Panel. Tab "Bảng Lương" tính lương theo số buổi đã dạy (status='present') + dạy thay đã xác nhận; hỗ trợ export Excel. Cột "Chưa XN" hiển thị buổi chưa bấm xác nhận.
 - **Multi-teacher + admin** — teachers see only their own data; admin manages all classes and teachers
@@ -88,3 +88,20 @@ npm run dev
 ```bash
 npm run build   # outputs to dist/
 ```
+
+---
+
+## Google Sheets API setup (curriculum tab)
+
+The "Tài Liệu" (curriculum) tab reads directly from a Google Sheet per course type instead of a database-backed CRUD flow. To enable it:
+
+1. In [Google Cloud Console](https://console.cloud.google.com/), create (or reuse) a project → **APIs & Services → Library** → enable **Google Sheets API** → **Credentials** → **Create credentials → API key**.
+2. Restrict the key: **API restrictions** → limit to Google Sheets API only; **Application restrictions** → HTTP referrers → add your production domain and `http://localhost:5173/*` (for local dev).
+3. Add the key to `.env`:
+   ```
+   VITE_GOOGLE_SHEETS_API_KEY=<your key>
+   ```
+4. For each curriculum Google Sheet file: **Share → General access → Anyone with the link → Viewer**.
+5. In the app, as an admin: go to **Giảng Dạy → tab "Tài Liệu" → "Cấu hình Sheet"** and paste the sheet link for each course type.
+
+Without this key, the "Tài Liệu" tab shows a configuration error when it tries to fetch — the rest of the app is unaffected.

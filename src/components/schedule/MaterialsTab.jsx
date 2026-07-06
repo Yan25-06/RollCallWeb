@@ -1,46 +1,74 @@
-import { useState, useEffect, useCallback, useMemo } from 'react'
-import { Plus, FileText, Upload } from 'lucide-react'
+import { useState, useEffect, useCallback, useMemo, useRef } from 'react'
+import { FileText, RefreshCw, ExternalLink, Settings } from 'lucide-react'
 import { Button, Empty, Skeleton, toast } from '@/components/ui'
-import { curriculumService } from '@/services/curriculumService'
+import { curriculumSheetService } from '@/services/curriculumSheetService'
+import { googleSheetCurriculumService } from '@/services/googleSheetCurriculumService'
 import { COURSE_TYPES } from '@/utils/courseTypes'
 import { CurriculumSidebar } from './CurriculumSidebar'
 import { SessionDetailPanel } from './SessionDetailPanel'
-import { MaterialModal } from './MaterialModal'
-import { MonthModal } from './MonthModal'
-import { SessionModal } from './SessionModal'
-import { ImportCurriculumModal } from './ImportCurriculumModal'
+import { SheetConfigModal } from './SheetConfigModal'
 
 /**
- * MaterialsTab — giáo trình & tài liệu theo courseType, layout master-detail:
- * sidebar trái (tháng → tuần → buổi) + panel phải (chi tiết buổi + tài liệu).
- * Admin: CRUD tháng/buổi/tài liệu. Giáo viên: chỉ xem.
- * @param {boolean} isAdmin
+ * MaterialsTab — giáo trình đọc trực tiếp từ Google Sheet theo courseType (read-only).
+ * Nguồn chân lý là Google Sheet; admin cấu hình link qua SheetConfigModal,
+ * chỉnh sửa nội dung làm trực tiếp trên Sheet.
+ * @param {boolean} isAdmin - hiện nút "Cấu hình Sheet"
  */
 export const MaterialsTab = ({ isAdmin = false }) => {
   const [courseType, setCourseType] = useState(COURSE_TYPES[0])
-  const [tree, setTree] = useState([])          // [{ ...month, sessions:[{...session, materials:[]}] }]
+  const [sheetMap, setSheetMap] = useState(null)   // null = đang tải cấu hình
+  const [tree, setTree] = useState([])
   const [loading, setLoading] = useState(false)
+  const [error, setError] = useState(null)
   const [selectedSessionId, setSelectedSessionId] = useState(null)
+  const [configOpen, setConfigOpen] = useState(false)
+  const cacheRef = useRef(new Map())               // courseType → tree (cache trong phiên)
+  const requestIdRef = useRef(0)                   // stamp mỗi lần gọi load() để bỏ qua phản hồi cũ (đổi courseType nhanh)
 
-  // Modal state
-  const [monthModal, setMonthModal] = useState({ open: false, editing: null })
-  const [sessionModal, setSessionModal] = useState({ open: false, editing: null, monthId: null })
-  const [materialModal, setMaterialModal] = useState({ open: false, editing: null, sessionId: null })
-  const [importOpen, setImportOpen] = useState(false)
+  const sheetUrl = sheetMap?.[courseType] || null
 
-  const load = useCallback(async () => {
-    setLoading(true)
+  // Nạp map link Sheet (mọi GV đọc được)
+  const loadSheetMap = useCallback(async () => {
     try {
-      setTree(await curriculumService.getByCourseType(courseType))
+      setSheetMap(await curriculumSheetService.getAll())
     } catch {
-      toast.error('Không thể tải giáo trình')
-      setTree([])
-    } finally {
-      setLoading(false)
+      toast.error('Không thể tải cấu hình Sheet')
+      setSheetMap({})
     }
-  }, [courseType])
+  }, [])
 
-  useEffect(() => { load() }, [load])
+  useEffect(() => { loadSheetMap() }, [loadSheetMap])
+
+  // Nạp giáo trình từ Google Sheet (cache theo courseType, force = nút Làm mới)
+  const load = useCallback(async (force = false) => {
+    // Stamp request này — nếu courseType đổi trước khi await xong, requestIdRef.current
+    // đã bị lần gọi load() mới ghi đè, nên so sánh lại requestId cho biết response còn "mới" hay không.
+    const requestId = ++requestIdRef.current
+    if (!sheetUrl) { setTree([]); setError(null); setLoading(false); return }
+    if (!force && cacheRef.current.has(courseType)) {
+      setTree(cacheRef.current.get(courseType))
+      setError(null)
+      setLoading(false)
+      return
+    }
+    setLoading(true)
+    setError(null)
+    try {
+      const { tree: t, warnings } = await googleSheetCurriculumService.fetchCurriculum(sheetUrl)
+      if (requestId !== requestIdRef.current) return // đã có lần gọi load() mới hơn — bỏ qua kết quả cũ
+      cacheRef.current.set(courseType, t)
+      setTree(t)
+      if (warnings.length > 0) toast.info(`${warnings.length} dòng trong Sheet bị bỏ qua (sai định dạng)`)
+    } catch (e) {
+      if (requestId !== requestIdRef.current) return
+      setTree([])
+      setError(e.message || 'Không thể tải giáo trình')
+    } finally {
+      if (requestId === requestIdRef.current) setLoading(false)
+    }
+  }, [courseType, sheetUrl])
+
+  useEffect(() => { if (sheetMap) load() }, [sheetMap, load])
 
   // Buổi đang chọn (kèm tháng chứa nó) — null nếu id không còn trong tree
   const selected = useMemo(() => {
@@ -50,61 +78,23 @@ export const MaterialsTab = ({ isAdmin = false }) => {
     return null
   }, [tree, selectedSessionId])
 
-  // Tự chọn buổi đầu tiên khi selection không còn hợp lệ
-  // (load lần đầu, đổi loại khóa, xóa buổi/tháng đang chọn)
+  // Tự chọn buổi đầu tiên khi selection không còn hợp lệ (đổi khóa, làm mới, load đầu)
   useEffect(() => {
     if (loading || selected) return
     const firstMonth = tree.find(m => m.sessions.length > 0)
     setSelectedSessionId(firstMonth?.sessions[0]?.id ?? null)
   }, [loading, selected, tree])
 
-  // ── Month handlers ──
-  const saveMonth = useCallback(async ({ data, isEdit, id }) => {
-    try {
-      if (isEdit) { await curriculumService.updateMonth(id, data); toast.success('Đã cập nhật tháng') }
-      else { await curriculumService.createMonth({ ...data, courseType }); toast.success('Đã thêm tháng') }
-      await load()
-    } catch (e) {
-      toast.error(e.message?.includes('duplicate') ? 'Số tháng đã tồn tại' : 'Không thể lưu tháng')
-    }
-  }, [courseType, load])
+  const handleConfigSaved = useCallback(() => {
+    cacheRef.current.clear()
+    loadSheetMap()
+  }, [loadSheetMap])
 
-  const deleteMonth = useCallback(async (id) => {
-    try { await curriculumService.removeMonth(id); toast.success('Đã xóa tháng'); await load() }
-    catch { toast.error('Không thể xóa tháng') }
-  }, [load])
-
-  // ── Session handlers ──
-  const saveSession = useCallback(async ({ data, isEdit, id }) => {
-    try {
-      if (isEdit) { await curriculumService.updateSession(id, data); toast.success('Đã cập nhật buổi') }
-      else { await curriculumService.createSession(data); toast.success('Đã thêm buổi') }
-      await load()
-    } catch { toast.error('Không thể lưu buổi') }
-  }, [load])
-
-  const deleteSession = useCallback(async (id) => {
-    try { await curriculumService.removeSession(id); toast.success('Đã xóa buổi'); await load() }
-    catch { toast.error('Không thể xóa buổi') }
-  }, [load])
-
-  // ── Material handlers ──
-  const saveMaterial = useCallback(async ({ data, isEdit, id }) => {
-    try {
-      if (isEdit) { await curriculumService.updateMaterial(id, data); toast.success('Đã cập nhật tài liệu') }
-      else { await curriculumService.createMaterial({ ...data, sessionId: materialModal.sessionId }); toast.success('Đã thêm tài liệu') }
-      await load()
-    } catch { toast.error('Không thể lưu tài liệu') }
-  }, [load, materialModal.sessionId])
-
-  const deleteMaterial = useCallback(async (id) => {
-    try { await curriculumService.removeMaterial(id); toast.success('Đã xóa tài liệu'); await load() }
-    catch { toast.error('Không thể xóa tài liệu') }
-  }, [load])
+  const initialLoading = sheetMap === null || loading
 
   return (
     <div className="flex flex-col gap-4">
-      {/* Toolbar: chọn loại khóa + thêm tháng */}
+      {/* Toolbar: chọn loại khóa + Làm mới + Mở Sheet + Cấu hình (admin) */}
       <div className="flex items-center gap-2 bg-white rounded-2xl border border-navy-100 shadow-navy-sm px-3 py-2 flex-wrap">
         <span className="text-xs text-navy-400 shrink-0">Loại khóa:</span>
         <select
@@ -115,20 +105,27 @@ export const MaterialsTab = ({ isAdmin = false }) => {
           {COURSE_TYPES.map(ct => <option key={ct} value={ct}>{ct}</option>)}
         </select>
         <div className="flex-1" />
-        {isAdmin && (
+        {sheetUrl && (
           <>
-            <Button variant="secondary" size="sm" onClick={() => setImportOpen(true)} className="flex items-center gap-1.5 shrink-0">
-              <Upload size={14} /> Import Excel
+            <Button variant="secondary" size="sm" onClick={() => load(true)} disabled={loading} className="flex items-center gap-1.5 shrink-0">
+              <RefreshCw size={14} className={loading ? 'animate-spin' : undefined} /> Làm mới
             </Button>
-            <Button variant="primary" size="sm" onClick={() => setMonthModal({ open: true, editing: null })} className="flex items-center gap-1.5 shrink-0">
-              <Plus size={14} /> Thêm tháng
-            </Button>
+            <a href={sheetUrl} target="_blank" rel="noopener noreferrer" className="shrink-0">
+              <Button variant="secondary" size="sm" className="flex items-center gap-1.5">
+                <ExternalLink size={14} /> Mở Sheet
+              </Button>
+            </a>
           </>
+        )}
+        {isAdmin && (
+          <Button variant="primary" size="sm" onClick={() => setConfigOpen(true)} className="flex items-center gap-1.5 shrink-0">
+            <Settings size={14} /> Cấu hình Sheet
+          </Button>
         )}
       </div>
 
       {/* Nội dung giáo trình */}
-      {loading ? (
+      {initialLoading ? (
         <div className="flex flex-col lg:flex-row gap-4">
           <div className="w-full lg:w-72 shrink-0 bg-white rounded-2xl border border-navy-100 shadow-navy-sm p-3 flex flex-col gap-2">
             {[1, 2, 3].map(i => <Skeleton key={i} className="h-10 rounded-lg" />)}
@@ -137,12 +134,29 @@ export const MaterialsTab = ({ isAdmin = false }) => {
             <Skeleton className="h-40 rounded-xl" />
           </div>
         </div>
+      ) : !sheetUrl ? (
+        <div className="bg-white rounded-2xl border border-navy-100 shadow-navy-sm p-12">
+          <Empty
+            icon={<FileText size={40} />}
+            title="Chưa cấu hình Google Sheet"
+            desc={isAdmin
+              ? 'Bấm "Cấu hình Sheet" để dán link file Google Sheet giáo trình cho loại khóa này.'
+              : 'Loại khóa này chưa được cấu hình giáo trình. Liên hệ admin.'}
+          />
+        </div>
+      ) : error ? (
+        <div className="bg-white rounded-2xl border border-navy-100 shadow-navy-sm p-12 flex flex-col items-center gap-3">
+          <Empty icon={<FileText size={40} />} title="Không tải được giáo trình" desc={error} />
+          <Button variant="secondary" size="sm" onClick={() => load(true)} className="flex items-center gap-1.5">
+            <RefreshCw size={14} /> Thử lại
+          </Button>
+        </div>
       ) : tree.length === 0 ? (
         <div className="bg-white rounded-2xl border border-navy-100 shadow-navy-sm p-12">
           <Empty
             icon={<FileText size={40} />}
-            title="Chưa có giáo trình"
-            desc={isAdmin ? 'Bấm "Thêm tháng" để bắt đầu xây giáo trình cho loại khóa này.' : 'Loại khóa này chưa có giáo trình.'}
+            title="Sheet chưa có nội dung"
+            desc='Không tìm thấy dòng "THÁNG n:" nào trong Sheet — kiểm tra định dạng file giáo trình.'
           />
         </div>
       ) : (
@@ -151,51 +165,18 @@ export const MaterialsTab = ({ isAdmin = false }) => {
             key={courseType}
             tree={tree}
             selectedSessionId={selectedSessionId}
-            isAdmin={isAdmin}
+            isAdmin={false}
             onSelectSession={setSelectedSessionId}
-            onAddSession={(monthId) => setSessionModal({ open: true, editing: null, monthId })}
-            onEditMonth={(month) => setMonthModal({ open: true, editing: month })}
-            onDeleteMonth={deleteMonth}
           />
-          <SessionDetailPanel
-            selected={selected}
-            isAdmin={isAdmin}
-            onEditSession={(s) => setSessionModal({ open: true, editing: s, monthId: selected?.month.id })}
-            onDeleteSession={(s) => deleteSession(s.id)}
-            onAddMaterial={(s) => setMaterialModal({ open: true, editing: null, sessionId: s.id })}
-            onEditMaterial={(m) => setMaterialModal({ open: true, editing: m, sessionId: m.sessionId })}
-            onDeleteMaterial={(m) => deleteMaterial(m.id)}
-          />
+          <SessionDetailPanel selected={selected} isAdmin={false} />
         </div>
       )}
 
-      <MonthModal
-        open={monthModal.open}
-        onClose={() => setMonthModal({ open: false, editing: null })}
-        editingItem={monthModal.editing}
-        onSave={saveMonth}
-        onDelete={deleteMonth}
-      />
-      <SessionModal
-        open={sessionModal.open}
-        onClose={() => setSessionModal({ open: false, editing: null, monthId: null })}
-        monthId={sessionModal.monthId}
-        editingItem={sessionModal.editing}
-        onSave={saveSession}
-        onDelete={deleteSession}
-      />
-      <MaterialModal
-        open={materialModal.open}
-        onClose={() => setMaterialModal({ open: false, editing: null, sessionId: null })}
-        editingItem={materialModal.editing}
-        onSave={saveMaterial}
-        onDelete={deleteMaterial}
-      />
-      <ImportCurriculumModal
-        open={importOpen}
-        onClose={() => setImportOpen(false)}
-        defaultCourseType={courseType}
-        onImportDone={load}
+      <SheetConfigModal
+        open={configOpen}
+        onClose={() => setConfigOpen(false)}
+        sheetMap={sheetMap ?? {}}
+        onSaved={handleConfigSaved}
       />
     </div>
   )

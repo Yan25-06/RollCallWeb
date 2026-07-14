@@ -127,9 +127,9 @@ export const AttendanceTab = ({ classId, scheduleTime }) => {
         present: optimistic.present,
         ...(patch.note !== undefined ? { note: optimistic.note } : {}),
       })
-    } catch {
+    } catch (err) {
       setAttendance(curr => patchCell(curr, activeSessionId, studentId, snapshot))
-      toast.error('Không thể lưu điểm danh, đã hoàn tác')
+      toast.error(`Không thể lưu điểm danh, đã hoàn tác: ${err?.message || 'lỗi không xác định'}`)
     }
   }
 

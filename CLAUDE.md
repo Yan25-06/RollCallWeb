@@ -210,6 +210,15 @@ Project quản lý thay đổi qua OpenSpec (`openspec/`). Có skill tích hợp
 - `fees.surcharge`: phụ phí tháng (upsert qua `feeService.upsert`), chỉ áp dụng cho `monthly`
 - **Không còn cột `fee_per_session`** trên bất kỳ bảng nào (đã xóa qua migration `20260602000003`)
 - UI đặt học phí: `EnrollmentModal` (toggle "Theo tháng / Theo khóa")
+- **Học phí tách theo TỪNG LỚP** (migration `20260714000001_scope_fees_payments_per_class.sql`): học sinh học ≥2 lớp có ≥2 khoản phải đóng độc lập, mỗi lớp một lịch sử thanh toán riêng — không gộp chung.
+  - `fees.class_id` (uuid, nullable, FK `classes`): unique key đổi thành `(student_id, class_id, year, month)`. `payments.class_id` đã có sẵn từ đầu (`20260101000005`) nhưng trước đây không được UI set — nay bắt buộc chọn khi tạo thanh toán.
+  - Dữ liệu cũ (trước migration) đã backfill: học sinh chỉ có đúng 1 enrollment active → gán `class_id` đó cho fees/payments cũ; học sinh đa lớp → giữ `class_id = NULL` (không đoán được thuộc lớp nào). Payment `class_id = NULL` **không** cộng vào "đã đóng" của bất kỳ dòng lớp nào trong `buildFeesRows` (loại hẳn, không gán bừa vào lớp nào).
+  - `feeService.buildFeesRows(year, month)`: sinh **1 dòng cho mỗi enrollment active** (không còn dedupe theo student — trước đây `if (byStudent[e.student_id]) continue` khiến học sinh đa lớp chỉ hiện 1 dòng và học phí lớp thứ 2 bị bỏ sót). `surcharge`/`paid` tra theo đúng cặp `(student_id, class_id)`.
+  - `calcFee`/`isFeePaid`/`getByStudentMonth`/`upsert` trong `feeService.js` nhận thêm tham số `classId` (dùng `enrollmentService.get(studentId, classId)` thay vì `.limit(1)` lấy enrollment đầu tiên).
+  - `paymentService.getPaidAmount(studentId, period, classId)` lọc thêm theo `classId`; thêm `paymentService.getByStudentClass(studentId, classId)` cho lịch sử thanh toán theo từng lớp.
+  - `PaymentModal`: thêm ô chọn **Lớp** bắt buộc, danh sách lọc theo enrollment active của học sinh đang chọn (tự chọn sẵn nếu học sinh chỉ học 1 lớp).
+  - `FeesTable`/`StudentPaymentHistoryPanel`: row key + lịch sử thanh toán khóa theo `(studentId, classId)`, không còn theo riêng `studentId`.
+  - **Stat card đếm "học viên"** (Dashboard "Chưa đóng phí", AdminPanel "HS chưa đóng phí", FeesPage "Đã đóng đủ"/"Còn nợ"): đếm theo **học sinh duy nhất**, không theo dòng lớp — 1 học sinh tính "chưa đóng đủ" nếu còn nợ ở bất kỳ lớp nào, "đã đóng đủ" chỉ khi mọi lớp đều đủ. Các thẻ tổng tiền (Tổng thu/Kỳ vọng/Còn nợ) và tab lọc debt/paid/partial vẫn cộng/lọc theo dòng (đúng vì bảng hiển thị theo lớp).
 
 ## Model settings
 - `settingsService` chỉ map `centerName`, `defaultFeePerSession`, `currency` (đã **bỏ `teacherName`/`teacher_name`** ở service layer — cột DB còn nhưng orphan, không migration drop).

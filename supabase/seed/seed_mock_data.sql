@@ -719,53 +719,64 @@ VALUES
 -- BƯỚC 12 : Fees (trải ≥2 tháng, mix paid T/F, có surcharge)
 -- ====================================================
 -- Dùng extract(year/month from ...) để tháng luôn khớp current_date
+-- class_id gắn theo enrollment tương ứng (fees nay khóa theo từng lớp —
+-- s03 Cường học 2 lớp c01+c02 nên chỉ gán phụ phí cho c01, c02 dùng học phí
+-- gốc không phụ phí, minh hoạ đúng tính năng tách học phí theo lớp).
 INSERT INTO public.fees
-  (id, student_id, year, month, surcharge, paid, note)
+  (id, student_id, class_id, year, month, surcharge, paid, note)
 VALUES
-  -- s01 An: tháng hiện tại chưa đóng, tháng trước đã đóng
+  -- s01 An (lớp c01): tháng hiện tại chưa đóng, tháng trước đã đóng
   ('0a000000-0000-0000-0000-000000000001',
    '01000000-0000-0000-0000-000000000001',
+   '02000000-0000-0000-0000-000000000001',
    EXTRACT(YEAR  FROM current_date)::smallint,
    EXTRACT(MONTH FROM current_date)::smallint,
    0, false, NULL),
   ('0a000000-0000-0000-0000-000000000002',
    '01000000-0000-0000-0000-000000000001',
+   '02000000-0000-0000-0000-000000000001',
    EXTRACT(YEAR  FROM current_date - interval '1 month')::smallint,
    EXTRACT(MONTH FROM current_date - interval '1 month')::smallint,
    0, true, NULL),
 
-  -- s03 Cường: tháng này chưa đóng (có phụ phí), tháng trước đã đóng
+  -- s03 Cường (lớp c01): tháng này chưa đóng (có phụ phí), tháng trước đã đóng
   ('0a000000-0000-0000-0000-000000000003',
    '01000000-0000-0000-0000-000000000003',
+   '02000000-0000-0000-0000-000000000001',
    EXTRACT(YEAR  FROM current_date)::smallint,
    EXTRACT(MONTH FROM current_date)::smallint,
    100000, false, 'Phụ phí học liệu'),
   ('0a000000-0000-0000-0000-000000000004',
    '01000000-0000-0000-0000-000000000003',
+   '02000000-0000-0000-0000-000000000001',
    EXTRACT(YEAR  FROM current_date - interval '1 month')::smallint,
    EXTRACT(MONTH FROM current_date - interval '1 month')::smallint,
    0, true, NULL),
 
-  -- s04 Dung: tháng này chưa đóng, tháng trước đã đóng
+  -- s04 Dung (lớp c03): tháng này chưa đóng, tháng trước đã đóng
   ('0a000000-0000-0000-0000-000000000005',
    '01000000-0000-0000-0000-000000000004',
+   '02000000-0000-0000-0000-000000000003',
    EXTRACT(YEAR  FROM current_date)::smallint,
    EXTRACT(MONTH FROM current_date)::smallint,
    0, false, NULL),
   ('0a000000-0000-0000-0000-000000000006',
    '01000000-0000-0000-0000-000000000004',
+   '02000000-0000-0000-0000-000000000003',
    EXTRACT(YEAR  FROM current_date - interval '1 month')::smallint,
    EXTRACT(MONTH FROM current_date - interval '1 month')::smallint,
    0, true, NULL),
 
-  -- s07 Mai: tháng này chưa đóng (có phụ phí), tháng trước đã đóng
+  -- s07 Mai (lớp c04): tháng này chưa đóng (có phụ phí), tháng trước đã đóng
   ('0a000000-0000-0000-0000-000000000007',
    '01000000-0000-0000-0000-000000000007',
+   '02000000-0000-0000-0000-000000000004',
    EXTRACT(YEAR  FROM current_date)::smallint,
    EXTRACT(MONTH FROM current_date)::smallint,
    50000, false, 'Phụ phí photocopy'),
   ('0a000000-0000-0000-0000-000000000008',
    '01000000-0000-0000-0000-000000000007',
+   '02000000-0000-0000-0000-000000000004',
    EXTRACT(YEAR  FROM current_date - interval '1 month')::smallint,
    EXTRACT(MONTH FROM current_date - interval '1 month')::smallint,
    0, true, NULL);

@@ -36,6 +36,17 @@ export const paymentService = {
     return (data ?? []).map(fromDB)
   },
 
+  async getByStudentClass(studentId, classId) {
+    const { data, error } = await supabase
+      .from('payments')
+      .select('*')
+      .eq('student_id', studentId)
+      .eq('class_id', classId)
+      .order('paid_at', { ascending: false })
+    if (error) throw new Error(error.message)
+    return (data ?? []).map(fromDB)
+  },
+
   async getByPeriod(period) {
     const { data, error } = await supabase
       .from('payments')
@@ -46,12 +57,14 @@ export const paymentService = {
     return (data ?? []).map(fromDB)
   },
 
-  async getPaidAmount(studentId, period) {
-    const { data, error } = await supabase
+  async getPaidAmount(studentId, period, classId) {
+    let query = supabase
       .from('payments')
       .select('amount')
       .eq('student_id', studentId)
       .eq('period', period)
+    if (classId) query = query.eq('class_id', classId)
+    const { data, error } = await query
     if (error) throw new Error(error.message)
     return (data ?? []).reduce((sum, p) => sum + (p.amount ?? 0), 0)
   },

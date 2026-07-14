@@ -57,7 +57,7 @@ export const StudentPaymentHistoryPanel = ({ open, onClose, student, payments, l
     <Modal
       open={open}
       onClose={onClose}
-      title={`Lịch sử thanh toán — ${student?.name ?? ''}`}
+      title={`Lịch sử thanh toán — ${student?.name ?? ''}${student?.className ? ` (${student.className})` : ''}`}
       footer={
         onAddPayment && (
           <div className="w-full">
@@ -65,7 +65,7 @@ export const StudentPaymentHistoryPanel = ({ open, onClose, student, payments, l
               variant="secondary"
               size="sm"
               className="w-full"
-              onClick={() => { onClose(); onAddPayment(student?.studentId) }}
+              onClick={() => { onClose(); onAddPayment(student?.studentId, student?.classId) }}
             >
               <Plus size={14} className="mr-1.5" />
               Thêm khoản thanh toán

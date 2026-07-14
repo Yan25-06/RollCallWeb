@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react'
 import { Modal, Button, Input, CurrencyInput } from '@/components/ui'
 import { studentService } from '@/services/studentService'
 import { enrollmentService } from '@/services/enrollmentService'
+import { classService } from '@/services/classService'
 import { todayISO, monthISO } from '@/utils/helpers'
 
 const METHODS = [
@@ -9,10 +10,11 @@ const METHODS = [
   { value: 'transfer', label: 'Chuyển khoản' },
 ]
 
-export const PaymentModal = ({ open, onClose, onSave, defaultStudentId, defaultPeriod }) => {
+export const PaymentModal = ({ open, onClose, onSave, defaultStudentId, defaultClassId, defaultPeriod }) => {
   const today = todayISO()
   const [form, setForm] = useState({
     studentId: defaultStudentId ?? '',
+    classId: defaultClassId ?? '',
     amount: '',
     paidAt: today,
     method: 'cash',
@@ -21,11 +23,14 @@ export const PaymentModal = ({ open, onClose, onSave, defaultStudentId, defaultP
   })
   const [errors, setErrors] = useState({})
   const [students, setStudents] = useState([])
+  const [enrollmentsByStudent, setEnrollmentsByStudent] = useState({})
+  const [classNames, setClassNames] = useState({})
 
   useEffect(() => {
     if (!open) return
     setForm({
       studentId: defaultStudentId ?? '',
+      classId: defaultClassId ?? '',
       amount: '',
       paidAt: today,
       method: 'cash',
@@ -34,21 +39,39 @@ export const PaymentModal = ({ open, onClose, onSave, defaultStudentId, defaultP
     })
     setErrors({})
 
-    Promise.all([studentService.getAll(), enrollmentService.getAll()])
-      .then(([allStudents, enrollments]) => {
-        const enrolledIds = new Set(
-          enrollments.filter(e => e.status !== 'dropped').map(e => e.studentId)
-        )
+    Promise.all([studentService.getAll(), enrollmentService.getAll(), classService.getAll()])
+      .then(([allStudents, enrollments, classes]) => {
+        const active = enrollments.filter(e => e.status !== 'dropped')
+        const enrolledIds = new Set(active.map(e => e.studentId))
         setStudents(allStudents.filter(s => enrolledIds.has(s.id)))
+
+        const byStudent = {}
+        for (const e of active) {
+          (byStudent[e.studentId] ??= []).push(e.classId)
+        }
+        setEnrollmentsByStudent(byStudent)
+        setClassNames(Object.fromEntries(classes.map(c => [c.id, c.name])))
       })
       .catch(() => {})
-  }, [open, defaultStudentId, defaultPeriod])
+  }, [open, defaultStudentId, defaultClassId, defaultPeriod])
 
   const set = (field, val) => setForm(f => ({ ...f, [field]: val }))
+
+  const setStudent = (studentId) => {
+    const classIds = enrollmentsByStudent[studentId] ?? []
+    setForm(f => ({
+      ...f,
+      studentId,
+      classId: classIds.length === 1 ? classIds[0] : '',
+    }))
+  }
+
+  const studentClassIds = enrollmentsByStudent[form.studentId] ?? []
 
   const validate = () => {
     const e = {}
     if (!form.studentId) e.studentId = 'Chọn học viên'
+    if (!form.classId) e.classId = 'Chọn lớp'
     const amt = Number(form.amount)
     if (!form.amount || isNaN(amt) || amt <= 0) e.amount = 'Số tiền phải lớn hơn 0'
     if (!form.paidAt) e.paidAt = 'Chọn ngày'
@@ -81,7 +104,7 @@ export const PaymentModal = ({ open, onClose, onSave, defaultStudentId, defaultP
           <select
             className={`select ${errors.studentId ? 'border-red-400' : ''}`}
             value={form.studentId}
-            onChange={e => set('studentId', e.target.value)}
+            onChange={e => setStudent(e.target.value)}
           >
             <option value="">-- Chọn học viên --</option>
             {students.map(s => (
@@ -89,6 +112,22 @@ export const PaymentModal = ({ open, onClose, onSave, defaultStudentId, defaultP
             ))}
           </select>
           {errors.studentId && <span className="text-xs text-red-600">{errors.studentId}</span>}
+        </div>
+
+        <div className="flex flex-col gap-1">
+          <label className="text-sm font-medium text-navy-700">Lớp *</label>
+          <select
+            className={`select ${errors.classId ? 'border-red-400' : ''}`}
+            value={form.classId}
+            onChange={e => set('classId', e.target.value)}
+            disabled={!form.studentId}
+          >
+            <option value="">-- Chọn lớp --</option>
+            {studentClassIds.map(id => (
+              <option key={id} value={id}>{classNames[id] ?? '—'}</option>
+            ))}
+          </select>
+          {errors.classId && <span className="text-xs text-red-600">{errors.classId}</span>}
         </div>
 
         <CurrencyInput

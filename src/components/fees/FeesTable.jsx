@@ -27,7 +27,7 @@ export const FeesTable = ({ rows, period, onAddPayment, onRefresh }) => {
     setHistoryFor(row)
     setLoadingHistory(true)
     try {
-      const payments = await paymentService.getByStudent(row.studentId)
+      const payments = await paymentService.getByStudentClass(row.studentId, row.classId)
       setHistoryPayments(payments)
     } catch {
       toast.error('Không tải được lịch sử thanh toán')
@@ -43,7 +43,7 @@ export const FeesTable = ({ rows, period, onAddPayment, onRefresh }) => {
   const reloadHistory = async () => {
     if (!historyFor) return
     try {
-      const payments = await paymentService.getByStudent(historyFor.studentId)
+      const payments = await paymentService.getByStudentClass(historyFor.studentId, historyFor.classId)
       setHistoryPayments(payments)
     } catch {
       toast.error('Không tải được lịch sử thanh toán')
@@ -79,7 +79,7 @@ export const FeesTable = ({ rows, period, onAddPayment, onRefresh }) => {
                 const { label, variant } = statusInfo(row.paid, row.expected)
                 return (
                   <tr
-                    key={row.studentId}
+                    key={`${row.studentId}-${row.classId}`}
                     onClick={() => openHistory(row)}
                     className="hover:bg-navy-50/40 transition-colors cursor-pointer"
                   >
@@ -98,7 +98,7 @@ export const FeesTable = ({ rows, period, onAddPayment, onRefresh }) => {
                     <td className="px-5 py-3 text-center" onClick={e => e.stopPropagation()}>
                       <button
                         title="Ghi nhận thanh toán"
-                        onClick={() => onAddPayment(row.studentId)}
+                        onClick={() => onAddPayment(row.studentId, row.classId)}
                         className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-xs font-medium text-navy-600 hover:text-emerald-700 hover:bg-emerald-50 border border-navy-100 hover:border-emerald-200 transition-colors"
                       >
                         <Plus size={13} />

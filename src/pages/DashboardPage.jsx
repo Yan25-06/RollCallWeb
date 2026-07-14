@@ -49,7 +49,10 @@ export const DashboardPage = ({ year, month, onNavigate, onAttendance }) => {
     ])
       .then(([payments, feeRows]) => {
         setMonthlyRevenue(payments.reduce((s, p) => s + (p.amount ?? 0), 0))
-        setDebtCount(feeRows.filter(r => r.paid < r.expected).length)
+        const unpaidStudentIds = new Set(
+          feeRows.filter(r => r.paid < r.expected).map(r => r.studentId)
+        )
+        setDebtCount(unpaidStudentIds.size)
       })
       .catch(() => { setMonthlyRevenue(0); setDebtCount(0) })
   }, [year, month])

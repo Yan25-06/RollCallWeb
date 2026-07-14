@@ -46,6 +46,7 @@ export const FeesPage = ({ year, month }) => {
   const [loading, setLoading] = useState(false)
   const [modalOpen, setModalOpen] = useState(false)
   const [defaultStudentId, setDefaultStudentId] = useState(null)
+  const [defaultClassId, setDefaultClassId] = useState(null)
   const [payStatusFilter, setPayStatusFilter] = useState('all')
   const [classFilter, setClassFilter] = useState('all')
   const refresh = useCallback(async (silent = false) => {
@@ -72,8 +73,9 @@ export const FeesPage = ({ year, month }) => {
     }
   }
 
-  const openAdd = (studentId = null) => {
+  const openAdd = (studentId = null, classId = null) => {
     setDefaultStudentId(studentId)
+    setDefaultClassId(classId)
     setModalOpen(true)
   }
 
@@ -85,9 +87,16 @@ export const FeesPage = ({ year, month }) => {
 
   const totalExpected = classFilteredRows.reduce((s, r) => s + r.expected, 0)
   const totalPaid = classFilteredRows.reduce((s, r) => s + r.paid, 0)
-  const paidCount = classFilteredRows.filter(r => r.paid >= r.expected && r.expected > 0).length
-  const debtCount = classFilteredRows.filter(r => r.paid < r.expected).length
   const totalDebt = classFilteredRows.reduce((s, r) => s + Math.max(0, r.expected - r.paid), 0)
+
+  // Đếm theo học sinh duy nhất (không theo dòng lớp): 1 học sinh học nhiều
+  // lớp chỉ tính "đã đóng đủ" khi mọi lớp đều đủ, tính "chưa đóng" nếu còn
+  // nợ ở bất kỳ lớp nào.
+  const studentIdsInScope = [...new Set(classFilteredRows.map(r => r.studentId))]
+  const paidCount = studentIdsInScope.filter(id =>
+    classFilteredRows.filter(r => r.studentId === id).every(r => r.paid >= r.expected)
+  ).length
+  const debtCount = studentIdsInScope.length - paidCount
 
   const tabCounts = {
     all:     classFilteredRows.length,
@@ -152,7 +161,7 @@ export const FeesPage = ({ year, month }) => {
             />
             <StatCard
               label="Đã đóng đủ"
-              value={`${paidCount}/${rows.length}`}
+              value={`${paidCount}/${studentIdsInScope.length}`}
               sub="học viên"
               icon={<Users size={16} />}
               accent="navy"
@@ -246,6 +255,7 @@ export const FeesPage = ({ year, month }) => {
         onClose={() => setModalOpen(false)}
         onSave={handleSave}
         defaultStudentId={defaultStudentId}
+        defaultClassId={defaultClassId}
         defaultPeriod={currentPeriod}
       />
     </div>

@@ -1,9 +1,11 @@
 import { supabase } from '@/lib/supabase'
 import { paymentService } from './paymentService'
+import { enrollmentService } from './enrollmentService'
 
 const fromDB = (row) => row ? {
   id: row.id,
   studentId: row.student_id,
+  classId: row.class_id,
   year: row.year,
   month: row.month,
   surcharge: row.surcharge ?? 0,
@@ -12,11 +14,12 @@ const fromDB = (row) => row ? {
 } : null
 
 export const feeService = {
-  async getByStudentMonth(studentId, year, month) {
+  async getByStudentMonth(studentId, classId, year, month) {
     const { data, error } = await supabase
       .from('fees')
       .select('*')
       .eq('student_id', studentId)
+      .eq('class_id', classId)
       .eq('year', year)
       .eq('month', month)
       .maybeSingle()
@@ -27,6 +30,7 @@ export const feeService = {
   async upsert(data) {
     const payload = {
       student_id: data.studentId,
+      class_id: data.classId,
       year: data.year,
       month: data.month,
     }
@@ -36,7 +40,7 @@ export const feeService = {
 
     const { data: row, error } = await supabase
       .from('fees')
-      .upsert(payload, { onConflict: 'student_id,year,month' })
+      .upsert(payload, { onConflict: 'student_id,class_id,year,month' })
       .select()
       .single()
     if (error) throw new Error(error.message)
@@ -44,31 +48,22 @@ export const feeService = {
   },
 
   // expected = monthly_fee + surcharge  |  course_fee (no session counting)
-  async calcFee(studentId, year, month) {
-    const [feeRec, enrRes] = await Promise.all([
-      this.getByStudentMonth(studentId, year, month),
-      supabase
-        .from('enrollments')
-        .select('fee_type, monthly_fee, course_fee')
-        .eq('student_id', studentId)
-        .neq('status', 'dropped')
-        .limit(1)
-        .maybeSingle(),
+  async calcFee(studentId, classId, year, month) {
+    const [feeRec, enr] = await Promise.all([
+      this.getByStudentMonth(studentId, classId, year, month),
+      enrollmentService.get(studentId, classId),
     ])
-    if (enrRes.error) throw new Error(enrRes.error.message)
-
-    const enr = enrRes.data
     if (!enr) return 0
 
-    if (enr.fee_type === 'course') return enr.course_fee ?? 0
-    return (enr.monthly_fee ?? 0) + (feeRec?.surcharge ?? 0)
+    if (enr.feeType === 'course') return enr.courseFee ?? 0
+    return (enr.monthlyFee ?? 0) + (feeRec?.surcharge ?? 0)
   },
 
-  async isFeePaid(studentId, year, month) {
+  async isFeePaid(studentId, classId, year, month) {
     const period = `${year}-${String(month).padStart(2, '0')}`
     const [totalFee, totalPaid] = await Promise.all([
-      this.calcFee(studentId, year, month),
-      paymentService.getPaidAmount(studentId, period),
+      this.calcFee(studentId, classId, year, month),
+      paymentService.getPaidAmount(studentId, period, classId),
     ])
     return totalFee > 0 && totalPaid >= totalFee
   },
@@ -91,56 +86,53 @@ export const feeService = {
     const [feeRes, payRes] = await Promise.all([
       supabase
         .from('fees')
-        .select('student_id, surcharge')
+        .select('student_id, class_id, surcharge')
         .in('student_id', studentIds)
         .eq('year', year)
         .eq('month', month),
       supabase
         .from('payments')
-        .select('student_id, amount')
+        .select('student_id, class_id, amount')
         .in('student_id', studentIds)
         .eq('period', period),
     ])
     if (feeRes.error) throw new Error(feeRes.error.message)
     if (payRes.error) throw new Error(payRes.error.message)
 
-    const surchargeByStudent = {}
+    const key = (studentId, classId) => `${studentId}:${classId}`
+
+    const surchargeByKey = {}
     for (const f of feeRes.data ?? []) {
-      surchargeByStudent[f.student_id] = f.surcharge ?? 0
+      if (!f.class_id) continue
+      surchargeByKey[key(f.student_id, f.class_id)] = f.surcharge ?? 0
     }
 
-    const paidByStudent = {}
+    // Payments without a class_id (legacy data, ambiguous for multi-class
+    // students) are excluded — they can't be attributed to one class row.
+    const paidByKey = {}
     for (const p of payRes.data ?? []) {
-      paidByStudent[p.student_id] = (paidByStudent[p.student_id] ?? 0) + (p.amount ?? 0)
+      if (!p.class_id) continue
+      const k = key(p.student_id, p.class_id)
+      paidByKey[k] = (paidByKey[k] ?? 0) + (p.amount ?? 0)
     }
 
-    // Group by student (a student may appear in multiple classes; take first active)
-    const byStudent = {}
-    for (const e of enrollments) {
-      if (byStudent[e.student_id]) continue
-      byStudent[e.student_id] = {
-        studentId: e.student_id,
-        name: e.students?.name ?? '—',
-        className: e.classes?.name ?? '—',
-        feeType: e.fee_type ?? 'monthly',
-        monthlyFee: e.monthly_fee ?? 0,
-        courseFee: e.course_fee ?? 0,
-      }
-    }
-
-    return Object.values(byStudent).map(s => {
-      const surcharge = surchargeByStudent[s.studentId] ?? 0
-      const expected = s.feeType === 'course'
-        ? s.courseFee
-        : s.monthlyFee + surcharge
+    // One row per (student, class) — a student enrolled in multiple classes
+    // gets one row per active enrollment.
+    return enrollments.map(e => {
+      const feeType = e.fee_type ?? 'monthly'
+      const monthlyFee = e.monthly_fee ?? 0
+      const courseFee = e.course_fee ?? 0
+      const surcharge = surchargeByKey[key(e.student_id, e.class_id)] ?? 0
+      const expected = feeType === 'course' ? courseFee : monthlyFee + surcharge
 
       return {
-        studentId: s.studentId,
-        name: s.name,
-        className: s.className,
-        feeType: s.feeType,
+        studentId: e.student_id,
+        classId: e.class_id,
+        name: e.students?.name ?? '—',
+        className: e.classes?.name ?? '—',
+        feeType,
         expected,
-        paid: paidByStudent[s.studentId] ?? 0,
+        paid: paidByKey[key(e.student_id, e.class_id)] ?? 0,
       }
     })
   },

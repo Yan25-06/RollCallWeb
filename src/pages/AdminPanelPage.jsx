@@ -45,7 +45,9 @@ export function AdminPanelPage() {
         teacherService.getAll(),
         feeService.buildFeesRows(now.getFullYear(), now.getMonth() + 1),
       ])
-      const unpaidCount = feeRows.filter(r => r.paid < r.expected).length
+      const unpaidCount = new Set(
+        feeRows.filter(r => r.paid < r.expected).map(r => r.studentId)
+      ).size
       setStats({
         totalStudents: students.length,
         activeClasses: classList.length,

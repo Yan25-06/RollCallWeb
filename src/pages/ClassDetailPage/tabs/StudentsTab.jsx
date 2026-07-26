@@ -10,7 +10,7 @@ import { StudentEditModal } from '@/components/students/StudentEditModal'
 import { studentService } from '@/services/studentService'
 import { enrollmentService } from '@/services/enrollmentService'
 
-export const StudentsTab = ({ classId, onEnrollmentChange, isAdmin = false }) => {
+export const StudentsTab = ({ classId, onEnrollmentChange, isAdmin = false, initialStudentId = null }) => {
   const [loading, setLoading] = useState(true)
   const [students, setStudents] = useState([])
   const [enrollments, setEnrollments] = useState([])
@@ -33,9 +33,12 @@ export const StudentsTab = ({ classId, onEnrollmentChange, isAdmin = false }) =>
       setEnrollments(classEnrollments)
 
       if (!selectedStudentId || !classEnrollments.find(e => e.studentId === selectedStudentId)) {
+        const wanted = initialStudentId && classEnrollments.find(e => e.studentId === initialStudentId)
+          ? initialStudentId
+          : null
         const firstActive = classEnrollments.find(e => e.status === 'active')
         const first = firstActive || classEnrollments[0]
-        setSelectedStudentId(first?.studentId || null)
+        setSelectedStudentId(wanted || first?.studentId || null)
       }
     } catch {
       // errors surfaced by empty state
@@ -43,11 +46,18 @@ export const StudentsTab = ({ classId, onEnrollmentChange, isAdmin = false }) =>
       setLoading(false)
     }
     onEnrollmentChange?.()
-  }, [classId])
+  }, [classId, initialStudentId])
 
   useEffect(() => {
     loadData()
   }, [classId])
+
+  useEffect(() => {
+    if (initialStudentId) {
+      setSelectedStudentId(initialStudentId)
+      setMobileShowDetail(true)
+    }
+  }, [initialStudentId])
 
   const handleSelectStudent = (studentId) => {
     setSelectedStudentId(studentId)

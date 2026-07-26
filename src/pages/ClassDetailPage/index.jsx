@@ -8,19 +8,22 @@ import { StudentsTab } from './tabs/StudentsTab'
 import { AttendanceTab } from './tabs/AttendanceTab'
 import { HomeworkTab } from './tabs/HomeworkTab'
 import { MockTestTab } from './tabs/MockTestTab'
+import { DashboardTab } from './tabs/DashboardTab'
 
 const TABS = [
+  { id: 'dashboard',   label: 'Tổng Quan', disabled: false },
   { id: 'students',    label: 'Học Viên',  disabled: false },
   { id: 'attendance',  label: 'Điểm Danh', disabled: false },
   { id: 'assignments', label: 'Bài Tập',   disabled: false },
   { id: 'mocktest',    label: 'Mock Test',  disabled: false },
 ]
 
-export const ClassDetailPage = ({ classId, onBack, initialTab = 'students', isAdmin = false }) => {
+export const ClassDetailPage = ({ classId, onBack, initialTab = 'dashboard', isAdmin = false }) => {
   const [activeTab, setActiveTab] = useState(initialTab)
   const [currentClass, setCurrentClass] = useState(null)
   const [studentCount, setStudentCount] = useState(0)
   const [loading, setLoading] = useState(true)
+  const [pendingStudentId, setPendingStudentId] = useState(null)
 
   const loadHeader = async () => {
     try {
@@ -48,6 +51,11 @@ export const ClassDetailPage = ({ classId, onBack, initialTab = 'students', isAd
   useEffect(() => {
     if (!loading && !currentClass) onBack?.()
   }, [loading, currentClass])
+
+  const handleSelectFromDashboard = (studentId) => {
+    setPendingStudentId(studentId)
+    setActiveTab('students')
+  }
 
   if (loading) {
     return (
@@ -146,8 +154,11 @@ export const ClassDetailPage = ({ classId, onBack, initialTab = 'students', isAd
 
       {/* Tab content */}
       <div className="flex-1 pt-5">
+        {activeTab === 'dashboard' && (
+          <DashboardTab classId={classId} onSelectStudent={handleSelectFromDashboard} />
+        )}
         {activeTab === 'students' && (
-          <StudentsTab classId={classId} isAdmin={isAdmin} onEnrollmentChange={loadHeader} />
+          <StudentsTab classId={classId} isAdmin={isAdmin} onEnrollmentChange={loadHeader} initialStudentId={pendingStudentId} />
         )}
         {activeTab === 'attendance' && (
           <AttendanceTab classId={classId} scheduleTime={currentClass?.scheduleTime} />

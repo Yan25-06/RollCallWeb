@@ -165,21 +165,9 @@ export const ReportCardContent = ({ student, cls, latestReview, settings = {}, d
             </div>
           )}
 
-          {/* Footer: ngày lập + 2 ô ký tên */}
-          <div className="border-t border-navy-100 pt-3 flex flex-col gap-4">
+          {/* Footer: ngày lập */}
+          <div className="border-t border-navy-100 pt-3">
             <p className="text-xs text-navy-400">Ngày lập: {new Date().toLocaleDateString('vi-VN')}</p>
-            <div className="grid grid-cols-2 gap-6 pt-2">
-              <div className="text-center">
-                <p className="text-xs font-semibold text-navy-600">Giáo viên</p>
-                <p className="text-xs text-navy-400 italic mt-0.5">{latestReview.teacherName || settings.teacherName || ''}</p>
-                <div className="border-t border-dashed border-navy-200 mt-8" />
-              </div>
-              <div className="text-center">
-                <p className="text-xs font-semibold text-navy-600">Phụ huynh</p>
-                <p className="text-xs text-navy-400 italic mt-0.5">(Ký, ghi rõ họ tên)</p>
-                <div className="border-t border-dashed border-navy-200 mt-8" />
-              </div>
-            </div>
           </div>
         </div>
       ) : (

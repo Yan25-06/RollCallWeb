@@ -13,27 +13,28 @@ guarantee good UX, though poor usability nearly always ruins it.
 Users judge the product by its interface, not its functionality. A correct feature behind a
 confusing screen reads as a broken feature.
 
-## Why the teacher/student split matters
+## Why the admin/teacher split matters
 
-Dimension weight depends on the user, and DictationHub has two genuinely different ones.
+Dimension weight depends on the user, and this CRM has two genuinely different ones.
 
-**Teachers** are frequent, repetitive, high-volume users. They become application experts
+**Admins** are frequent, repetitive, high-volume users. They become application experts
 quickly and stay there. Friction they meet once is friction they meet fifty times. Their
-errors destroy authored content, so the cost of a mistake is high — worth a confirm, and
+errors touch money and permissions, so the cost of a mistake is high — worth a confirm, and
 worth an undo.
 
-**Students** are infrequent and novice on both the domain and the app. They arrive with no
-memory of last session's state. Their errors are cheap (a wrong dictation answer is the
-*point* of the exercise), so recovery must be instant and lightweight — never a modal.
+**Teachers** use the app in bursts after teaching, days apart. They arrive having forgotten
+the specifics of where things are, so memorability matters more than raw speed. Their errors
+— a wrong attendance mark, a mistyped score — are cheap to fix, so recovery must be in place
+and lightweight, never a modal.
 
 Novice vs expert splits three ways: **domain**, **application**, and **feature** experience.
-A teacher with a year on DictationHub is still a novice on a feature shipped yesterday, so
-new features need onboarding affordances even for expert users.
+An admin with a year on this app is still a novice on a feature shipped yesterday, so new
+features need onboarding affordances even for expert users.
 
 **Power law of practice** (`Tₙ = T₁·n⁻ᵃ`, a ≈ 0.2–0.6): novices improve rapidly with
 repetition, then plateau. What a frequent user lives with is the plateau height, not the
 first-run time. Optimising the first run at the cost of the steady state is the wrong trade
-for teacher flows — and the right one for student flows.
+for admin flows — and the right one for teacher flows.
 
 ## The five dimensions and their measures
 
@@ -65,6 +66,6 @@ is nearly always cheaper and better than adding a parallel one.
 
 UI accounts for roughly 60% of lifecycle cost (dialogue management 40%, presentation 20%),
 and most of that is *modification* — made painful when UI and application logic interweave.
-This is the reason the codebase separates `repositories/` (data), `hooks/` (state and
-mutations), and `features/` + `components/` (presentation). Keeping new work on that seam is
-what keeps the interface cheap to change.
+This is the reason this codebase separates `services/` (Supabase data access), `hooks/`
+(auth and permissions state), and `pages/` + `components/` (presentation). Keeping new work
+on that seam is what keeps the interface cheap to change.

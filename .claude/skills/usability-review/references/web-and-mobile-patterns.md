@@ -33,9 +33,11 @@ Every screen must answer all four:
 3. **Where have I been?** — visited state, breadcrumb trail, progress
 4. **What can I do now?** — the actions available here
 
-DictationHub has `Breadcrumb.jsx` and `AppShell.jsx` for 1 and 3. When adding a route, check
-it appears in the breadcrumb and that the nav shows the active section — an orphan page that
-answers none of the four is how people get lost and leave.
+This app has **no breadcrumb and no URL routing** — `App.jsx` keeps the current page in
+`useState` and only mirrors it into History API, so the URL never changes. Question 1 (where
+am I) is answered by the sidebar highlight alone, question 3 (where have I been) only by the
+browser Back button. Any new screen must be checked against all four questions explicitly,
+because the framework gives none of them for free.
 
 Related: **hypertext's cost.** Non-linear structure lets users take their own path, but the
 price is fragmented information and "where am I?" disorientation. Structure and search are
@@ -49,9 +51,10 @@ logically so people can navigate and locate.
 
 > **Even the best search cannot rescue a bad taxonomy.**
 
-For DictationHub the taxonomy is the product: Test → Part → Lesson → Segment. When adding a
-content type, place it in that hierarchy deliberately rather than bolting on a new top-level
-concept — a taxonomy that stops matching how teachers think is the expensive kind of debt.
+For this CRM the taxonomy is the product: Lớp → Buổi (session) → Học viên, cùng với Giáo
+trình: Loại khóa → Tháng → Buổi → Tài liệu. When adding a content type, place it in that
+hierarchy deliberately rather than bolting on a new top-level concept — a taxonomy that stops
+matching how teachers think is the expensive kind of debt.
 
 ## Writing for the screen
 
@@ -155,17 +158,15 @@ daily — that's friction repeated fifty times.
 
 ## Mobile
 
-DictationHub is a responsive web app, not a native one, so most native-shell patterns
+This app is a responsive web app, not a native one, so most native-shell patterns
 (springboard, gallery, metaphor navigation) don't apply. What does:
 
 - **Constraints are real**: small screen, low resolution, **error-prone and slow text entry**,
   glare, noisy environments, interruption, and a slower connection than you develop on.
-- **Bottom-of-screen controls are easier to reach** than top ones on a phone; screen edges are
-  cheap targets (Fitts). Playback controls in the dictation flow benefit.
-- **Text entry is the expensive operation.** Every field a student must type on a phone is a
-  cost — which is the whole task in dictation, so keep *everything else* tap-only.
-- **Context matters**: students practise with headphones, possibly in public, possibly
-  interrupted. State must survive a backgrounded tab, and progress must never be silently lost.
+- Both user groups work on desktop, so mobile is a robustness requirement, not an optimisation
+  target. What still matters: nothing may overflow horizontally at 768px and 375px, the sidebar
+  must collapse to a usable menu, and wide tables (fees, payroll, score entry) must scroll
+  inside their own container rather than breaking the page.
 - **Notifications and "invitations"** (coach marks, first-run hints, empty-state prompts) are
   how a new feature gets discovered — remember that even an expert teacher is a novice on a
   feature shipped yesterday.

@@ -42,8 +42,9 @@ even though every function is present.
 
 **Stopping rule (P × C):** stop decomposing when the *probability* of an error times the
 *cost* of that error is acceptably low. Decompose further only where mistakes are likely and
-expensive — for DictationHub, that's destructive teacher operations and anything touching
-already-submitted student work, not routine browsing.
+expensive — here that means anything touching money — recording a payment, setting a session
+rate — and any delete that cascades (deleting a curriculum month deletes its sessions and
+materials), not routine browsing.
 
 ## Where the data comes from
 
@@ -95,8 +96,8 @@ compare two designs.
 Two lessons that survive the crude numbers:
 
 - **`H` is expensive.** Forcing a hand between keyboard and mouse repeatedly costs more than
-  people expect — a strong argument for keyboard paths through the dictation flow and
-  through repetitive teacher authoring.
+  people expect — a strong argument for keyboard paths through score entry and attendance
+  marking and through repetitive teacher authoring.
 - **`M` dominates.** Thinking costs more than clicking. A design with fewer clicks but more
   decisions can be *slower*. Reducing decisions beats reducing clicks.
 

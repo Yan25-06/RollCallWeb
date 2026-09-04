@@ -16,8 +16,8 @@ Four impairment classes: **visual, auditory, cognitive, mobility**.
 
 - **7–8% of men cannot distinguish red from green** (0.4% of women). Never encode meaning by
   colour alone; pair it with an icon, underline, weight, shape, or text.
-- DictationHub is audio-first, so audio must never be the *only* carrier of information —
-  transcripts, captions, and visible state stay available.
+- Meaning must never ride on colour alone — attendance status, fee status and payroll state
+  all currently lean on colour, so each needs a second channel.
 - Icon-only controls need `aria-label`. This is an accessibility requirement, not a style one.
 - Accessible design usually helps everyone (the curb-cut effect): captions help noisy rooms,
   big targets help tired hands.
@@ -27,12 +27,13 @@ Four impairment classes: **visual, auditory, cognitive, mobility**.
 **Similar things should work similarly. Different things should look different.**
 
 Three kinds:
-- **Internal** — within DictationHub.
+- **Internal** — within this CRM.
 - **External** — matches conventions from other apps users already know.
 - **Metaphorical** — matches the real-world object being referenced.
 
 **Speak the user's language**: common words, no jargon, no internal/DB terms leaking into
-labels — but not verbose either. Applies to both `locales/en` and `locales/vi`.
+labels — but not verbose either. Toàn bộ giao diện là tiếng Việt; không để thuật ngữ tiếng
+Anh hay tên cột database rò ra nhãn.
 
 Consistency is *why* the component classes in `index.css` exist. Hand-spelling utilities
 instead of reusing `btn-primary` / `card` / `input` is a consistency defect, not merely a
@@ -54,8 +55,9 @@ In UI:
 - Flat design erodes affordances. If a bordered box could be a button *or* a text field, the
   design is broken. Buttons must read as pressable and differ visibly from inputs.
 - **Natural mapping** — the arrangement of controls should mirror the arrangement of what
-  they control. In dictation, segment list, waveform, and playhead should be spatially
-  consistent so screen position maps to audio position.
+  they control. In the weekly schedule grid, a session's position on screen must match its
+  day and time — a card in Wednesday's column at 18:00 is the only correct place for that
+  session.
 - **Feedback** — every action needs an immediate perceivable effect (visual, audio, or
   haptic). A click with no response reads as a broken app, and the user clicks again.
 

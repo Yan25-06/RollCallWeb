@@ -94,7 +94,7 @@ don't box in a teacher who wants to type fast.
   The deck states outright: **"Red is not at all danger (preferable) in many countries."**
   Light switches: down is off in America, down is **on** in Britain.
 
-**This is a direct warning for DictationHub.** The app is bilingual EN/VI, and red carries
+**This is a direct warning here.** The app is entirely in Vietnamese, and red carries
 positive connotations (luck, celebration) in Vietnamese culture rather than danger. It
 reinforces hard rule 1 from a second direction: red/green is not only inaccessible to
 colour-blind users, it is **culturally ambiguous**. Never let it carry meaning alone.

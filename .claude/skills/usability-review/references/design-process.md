@@ -9,8 +9,8 @@ outputs are *things*, and it is *human-centred*.
 
 The deck's example is a hand-made mug: beautiful as an object, and shaped so that drinking
 from it pours tea down your chin. **Art is judged by how it looks; design is judged by how
-it is used.** A DictationHub screen that looks polished but costs a teacher an extra click
-fifty times a week is a failed design, however good the screenshot.
+it is used.** A screen that looks polished but costs an admin an extra click fifty times a
+week is a failed design, however good the screenshot.
 
 Design also means choosing **which outcome should result among infinite possibilities** —
 so the job is to generate alternatives and pick, not to implement the first idea that works.
@@ -54,7 +54,7 @@ the least thing that answers it.
 Deliberately mixing them is the skill. A **horizontal** prototype covers many features
 shallowly (good for testing navigation and information architecture); a **vertical**
 prototype implements one feature completely (good for testing whether a hard interaction
-works at all). For the dictation player, vertical; for the teacher content area, horizontal.
+works at all). For the weekly schedule grid, vertical; for the fees table, horizontal.
 
 **Low-fidelity (paper) prototyping** — sketches, index cards, sticky notes, with a person
 playing "the computer" by swapping pages in response to taps.
@@ -70,9 +70,8 @@ playing "the computer" by swapping pages in response to taps.
 - **Storyboard** — a fixed sequence of screens showing an interaction, no real logic.
 - **Form builder / mockup tool** — clickable, real-looking, no backend.
 - **Wizard of Oz** — the user believes the system is doing something a human is actually
-  doing behind the scenes. The classic use is exactly DictationHub's case: testing a
-  *speech-recognition or auto-transcription* feature by having a person type the result, to
-  learn whether the feature is wanted and how it should behave before building the model.
+  doing behind the scenes. The classic use here would be testing an auto-generated payroll or
+  fee summary by computing it by hand first, before building the calculation.
 
 **The prototyping trap:** a high-fidelity prototype invites the question "can we just ship
 this?" Prototype code is not product code — it has no error handling, no edge cases, and no
@@ -132,9 +131,9 @@ memory limit.
 
 **Determine users' skill levels** — a three-tier refinement of the teacher/student split:
 
-| Level | In DictationHub |
+| Level | In this CRM |
 |---|---|
-| Novice / first-time | A student's first dictation; a teacher's first lesson |
+| Novice / first-time | A teacher's first time writing a review; an admin's first payroll month |
 | **Knowledgeable intermittent** | A returning student after a week — knows the app, has forgotten the specifics. **Needs memorability most.** |
 | Expert / frequent | A teacher authoring daily |
 

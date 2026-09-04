@@ -28,7 +28,7 @@ cần "không vỡ" ở 768px và 375px, không phải mục tiêu tối ưu.
 
 ## Hard rules
 
-1. **No meaning by colour alone.** Add a second channel — icon, underline, weight, or text. See `references/visual-design.md` for contrast and `references/interface-principles.md` for accessibility. Reference implementations: *chưa xác định — điền sau khi audit (Task 7) tìm được component đạt chuẩn trong repo này.*
+1. **No meaning by colour alone.** Add a second channel — icon, underline, weight, or text. See `references/visual-design.md` for contrast and `references/interface-principles.md` for accessibility. Reference implementations: `src/components/mock-test/MockTestScoreTable.jsx` (`ScoreCell` — min/max clamp with a toast explaining *why*, plus a `title` tooltip) and `src/components/reviews/RadarChartPanel.jsx` (replaces the hidden "Thêm Đánh Giá" button with explanatory text instead of just removing it). See `docs/usability-audit-2026-09-04.md` for how these were verified.
 2. **Không được mất dữ liệu đang nhập.** Form dài — điểm danh cả lớp, nhập điểm mock test cả
    lớp, phiếu nhận xét — không được mất khi lỡ đóng modal, bấm Esc, hay rớt mạng. App có
    `OfflineBanner` và `utils/retryQueue.js`, nên mất mạng giữa chừng là tình huống có thật,
@@ -85,6 +85,11 @@ Go deeper:
 | `references/visual-design.md` | Affordance, contrast, Gestalt |
 | `references/interaction-styles.md` | Menus, direct manipulation |
 | `references/evaluation.md` | Heuristics, severity, testing |
+
+## Trạng thái hiện tại
+
+Đợt heuristic evaluation gần nhất: `docs/usability-audit-2026-09-04.md` — toàn bộ màn hình và
+sáu luồng nghiệp vụ, hai vai. Đọc nó trước khi sửa bất kỳ màn hình nào có tên trong đó.
 
 ## Source
 

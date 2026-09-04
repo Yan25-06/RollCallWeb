@@ -30,8 +30,9 @@ Practical consequences:
 
 - **Good defaults** — pre-select the most common choice so the frequent case is zero decisions.
 - **Aggregate repeated work** into one bulk action rather than N single ones.
-- **Keyboard shortcuts and accelerators** for repeated actions. Dictation playback already
-  does this; content authoring should too.
+- **Keyboard shortcuts and accelerators** for repeated actions. Nothing in this app has
+  keyboard shortcuts yet; attendance marking and score entry are where they would pay off
+  most.
 - **History / recents** — recently edited lessons, recent assignments, last-used settings.
 - **Autocomplete** on any field whose values already exist in the database.
 - **Auto-suggestion** — offer likely completions before the user finishes thinking.

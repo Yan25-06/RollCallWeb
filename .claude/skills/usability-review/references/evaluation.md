@@ -16,8 +16,8 @@ enough to actually do.
   context (*"experimenter vs. boss"*). Partial solution: **use real users, task-centred
   tasks, and an environment similar to the real situation.**
 
-For DictationHub the "lab" caveat is concrete: a student practising dictation in a quiet room
-while you watch is not a student practising on a phone with headphones on a bus.
+For this CRM the "lab" caveat is concrete: an admin closing the month's fees calmly while you
+watch is not the same admin doing it under deadline with a parent waiting on the phone.
 
 ## Discount usability evaluation
 
@@ -119,7 +119,7 @@ a plain description of the problem and why it confuses users:
 > used "Write file" on the second screen. Users may be confused by this different terminology
 > for the same function.
 
-That is a good template for logging DictationHub UI issues — and note the second axis: **fix
+That is a good template for logging UI issues in this CRM — and note the second axis: **fix
 difficulty is rated separately from severity**, which is what lets you pick off severity-3
 problems that cost nothing (`Fix 0`).
 
@@ -165,9 +165,9 @@ semi-knowledgeable "coach" with a novice, and **only the novice touches the inte
 novice asks, the coach answers. It gives insight into two user groups at once, and the
 conversation is natural in a way think-aloud is not.
 
-**Think-aloud is a poor fit for dictation practice specifically** — the task *is* listening
-and typing, so talking through it destroys the thing being measured. Use **RTA** for the
-practice flow and reserve think-aloud for teacher authoring.
+**Think-aloud fits this CRM well** — both user groups work at a desk, and no task depends on
+listening, so talking through it costs nothing. Use it for both roles; reserve retrospective
+think-aloud for anything done under time pressure, such as closing the month's fees.
 
 ## Running a user test
 
@@ -224,9 +224,8 @@ The realistic evaluation programme for a solo project:
 2. **Recruit 2–4 more people** for the same pass when a release matters — that is where the
    35% → 75% jump lives.
 3. **Conceptual model extraction** on screenshots before building a new screen.
-4. **RTA** with one or two real students for the practice flow; **think-aloud** with a teacher
-   for authoring.
-5. **Analytics events** on the flows you care about, plus site-speed monitoring for audio.
+4. **Think-aloud** with one admin on the fees flow and one teacher on the review flow.
+5. Analytics is not installed and is out of scope; skip it until there is a reason.
 6. Record **critical incidents**, including the positive ones.
 
 ## Not yet captured

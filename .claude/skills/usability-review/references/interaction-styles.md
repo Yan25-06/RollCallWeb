@@ -4,7 +4,7 @@ Source: **LN10 Interaction Styles**. Verified against the slides.
 
 "Dialog type = interaction style." The deck covers seven, then compares them against user
 profile and task characteristics. The value here is **choosing deliberately** rather than
-defaulting, and knowing that DictationHub already mixes several.
+defaulting, and knowing that this CRM already mixes several.
 
 ## The seven styles
 
@@ -19,8 +19,8 @@ defaulting, and knowing that DictationHub already mixes several.
 | **Direct manipulation** | Physical properties reflected in objects |
 
 Plus query language (a specialised command language) and VR/multimedia. **Real systems
-combine them** — and DictationHub does: menus for navigation, form fill-in for authoring,
-direct manipulation for the waveform and segment list, function keys for playback shortcuts.
+combine them** — and this CRM does: menus for navigation, form fill-in for data entry, direct
+manipulation in the weekly schedule grid, and table editing for scores and attendance.
 
 ## Menus
 
@@ -95,8 +95,9 @@ than words**.
 - Provide **visual feedback for position selection and movement**, and physical feedback for
   modes.
 
-This is the style the dictation player and segment editor live in, and "rapid, incremental,
-**reversible**" plus "immediate visibility of results" is the standard those screens are held to.
+This is the style the weekly schedule grid and the attendance toggles live in, and "rapid,
+incremental, **reversible**" plus "immediate visibility of results" is the standard those
+screens are held to.
 
 ## Function keys / shortcuts
 
@@ -117,7 +118,7 @@ Combines features of menus and fill-in forms; the user is posed a **single quest
 time. Examples: **wizard dialogs** and prompts for missing parameters. **Appropriate for
 lowly-motivated, less-experienced users**; requires little training.
 
-That last point is the sharpest one for DictationHub: a wizard signals *"we expect you to be
+That last point is the sharpest one for this CRM: a wizard signals *"we expect you to be
 inexperienced and unmotivated."* Right for a student's first-run setup; wrong for a teacher's
 daily authoring.
 
@@ -154,13 +155,13 @@ rows that matter here:
 | **Turnover rate** | High | Low–Mod | High | Low | High |
 | **Task structure** | High | High | High | Low | Low |
 
-Read across for DictationHub:
+Read across for this CRM:
 
-- **Students** — low typing skill relative to the task, low system and application
-  experience, low frequency, no training, high turnover. That is the **menu + direct
-  manipulation** column, exactly. Any student-facing screen that drifts toward command-style
-  or heavy form fill-in is in the wrong column.
-- **Teachers** — moderate-to-high typing, high task experience, high frequency, low turnover.
+- **Teachers** — low-to-moderate typing skill relative to the task, moderate system and
+  application experience, low frequency (bursts after teaching), no formal training, moderate
+  turnover. That is closer to the **menu + form fill-in** column. Any teacher-facing screen
+  that drifts toward command-style is in the wrong column.
+- **Admins** — moderate-to-high typing, high task experience, high frequency, low turnover.
   That is **form fill-in**, with command-language-like accelerators layered on top. Which is
   the same conclusion the efficiency reference reaches from Fitts's law, arrived at
   independently.
@@ -168,4 +169,4 @@ Read across for DictationHub:
 The deck also notes user *psychology*: command language is the only style associated with a
 **positive attitude and high motivation** — it suits users who *want* to invest. Menus, Q&A,
 function keys, direct manipulation and natural language all assume low motivation. Assume low
-motivation for students; that is the correct assumption for a homework app.
+motivation for teachers arriving days apart; that is the correct assumption here.

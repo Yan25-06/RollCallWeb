@@ -10,9 +10,9 @@ import { HomeworkTab } from './tabs/HomeworkTab'
 import { MockTestTab } from './tabs/MockTestTab'
 
 const TABS = [
-  { id: 'students',    label: 'Học Viên',  disabled: false },
-  { id: 'attendance',  label: 'Điểm Danh', disabled: false },
-  { id: 'assignments', label: 'Bài Tập',   disabled: false },
+  { id: 'students',    label: 'Học viên',  disabled: false },
+  { id: 'attendance',  label: 'Điểm danh', disabled: false },
+  { id: 'assignments', label: 'Bài tập',   disabled: false },
   { id: 'mocktest',    label: 'Mock Test',  disabled: false },
 ]
 

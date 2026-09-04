@@ -99,7 +99,7 @@ export const ReportCardContent = ({ student, cls, latestReview, settings = {}, d
             if (!hasScores) return null
             return (
               <div>
-                <p className="text-xs font-bold text-navy-600 uppercase tracking-wide mb-2">Điểm Kỹ Năng</p>
+                <p className="text-xs font-bold text-navy-600 uppercase tracking-wide mb-2">Điểm kỹ năng</p>
                 <div className="grid grid-cols-2 gap-2">
                   {skillConfig.map(skill => {
                     const score = scores[skill.name]
@@ -127,7 +127,7 @@ export const ReportCardContent = ({ student, cls, latestReview, settings = {}, d
           {/* Tags */}
           {latestReview.tags?.length > 0 && (
             <div>
-              <p className="text-xs font-bold text-navy-600 uppercase tracking-wide mb-2">Nhận Xét</p>
+              <p className="text-xs font-bold text-navy-600 uppercase tracking-wide mb-2">Nhận xét</p>
               <div className="flex flex-wrap gap-1.5">
                 {latestReview.tags.map(t => (
                   <span key={t} className={`text-xs px-2 py-0.5 rounded-full border font-medium ${
@@ -144,7 +144,7 @@ export const ReportCardContent = ({ student, cls, latestReview, settings = {}, d
           {/* Remark */}
           {latestReview.remark && (
             <div>
-              <p className="text-xs font-bold text-navy-600 uppercase tracking-wide mb-1">Ghi Chú</p>
+              <p className="text-xs font-bold text-navy-600 uppercase tracking-wide mb-1">Ghi chú</p>
               <p className="text-sm text-navy-700 whitespace-pre-wrap">{latestReview.remark}</p>
             </div>
           )}
@@ -160,7 +160,7 @@ export const ReportCardContent = ({ student, cls, latestReview, settings = {}, d
           {/* General comment */}
           {generalComment?.text && (
             <div className="border border-blue-200 rounded-xl px-4 py-3 bg-blue-50">
-              <p className="text-xs font-bold text-blue-700 uppercase tracking-wide mb-1">Nhận Xét Tổng Kết</p>
+              <p className="text-xs font-bold text-blue-700 uppercase tracking-wide mb-1">Nhận xét tổng kết</p>
               <p className="text-sm text-navy-700 whitespace-pre-wrap">{generalComment.text}</p>
             </div>
           )}
@@ -225,7 +225,7 @@ export const ReportCardModal = ({ open, onClose, student, cls, latestReview, set
       <div className="bg-white rounded-2xl shadow-2xl w-full max-w-lg flex flex-col">
         {/* Modal header */}
         <div className="flex items-center justify-between px-5 py-4 border-b border-navy-100">
-          <p className="font-semibold text-navy-900">Phiếu Kết Quả Học Viên</p>
+          <p className="font-semibold text-navy-900">Phiếu kết quả học viên</p>
           <button onClick={onClose} className="p-1.5 rounded-lg text-navy-400 hover:bg-navy-50 transition-colors">
             <X size={18} />
           </button>

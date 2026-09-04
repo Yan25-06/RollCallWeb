@@ -173,7 +173,7 @@ export const BulkExportModal = ({ open, onClose, students = [], cls, settings = 
       <div className="fixed inset-0 z-50 bg-black/50 backdrop-blur-sm flex items-center justify-center p-4">
         <div className="bg-white rounded-2xl shadow-2xl w-full max-w-sm">
           <div className="flex items-center justify-between px-5 py-4 border-b border-navy-100">
-            <p className="font-semibold text-navy-900">Xuất Phiếu Hàng Loạt</p>
+            <p className="font-semibold text-navy-900">Xuất phiếu hàng loạt</p>
             {phase !== 'rendering' && (
               <button onClick={onClose} className="p-1.5 rounded-lg text-navy-400 hover:bg-navy-50 transition-colors">
                 <X size={18} />
@@ -191,7 +191,7 @@ export const BulkExportModal = ({ open, onClose, students = [], cls, settings = 
                 <p className="text-xs text-navy-400">{students.length} học sinh trong lớp · lớp <span className="font-medium">{cls?.name}</span></p>
                 <div className="flex gap-2 justify-end">
                   <Button variant="secondary" size="sm" onClick={onClose}>Hủy</Button>
-                  <Button variant="primary" size="sm" onClick={startExport}>Bắt Đầu Xuất</Button>
+                  <Button variant="primary" size="sm" onClick={startExport}>Bắt đầu xuất</Button>
                 </div>
               </>
             )}
@@ -231,7 +231,7 @@ export const BulkExportModal = ({ open, onClose, students = [], cls, settings = 
                 <p className="text-sm text-red-600">Có lỗi xảy ra. Vui lòng thử lại.</p>
                 <div className="flex gap-2">
                   <Button variant="secondary" size="sm" onClick={onClose}>Đóng</Button>
-                  <Button variant="primary" size="sm" onClick={startExport}>Thử Lại</Button>
+                  <Button variant="primary" size="sm" onClick={startExport}>Thử lại</Button>
                 </div>
               </div>
             )}

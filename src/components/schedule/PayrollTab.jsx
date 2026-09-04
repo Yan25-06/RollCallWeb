@@ -76,7 +76,7 @@ export const PayrollTab = ({ classes = [], schedule = [], teachers = [], isAdmin
     <div className="bg-white rounded-2xl border border-navy-100 shadow-navy-sm p-5 flex flex-col gap-4">
       <div className="flex items-center justify-between gap-3 flex-wrap">
         <h3 className="font-semibold text-navy-800 text-base flex items-center gap-2">
-          <Wallet size={16} /> Bảng Lương theo tháng
+          <Wallet size={16} /> Bảng lương theo tháng
         </h3>
         <div className="flex items-center gap-2">
           <input

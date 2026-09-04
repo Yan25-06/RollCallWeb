@@ -67,7 +67,7 @@ export function AuthProvider({ children }) {
     setTeacher(null)
   }
 
-  // Cập nhật tên hiển thị (teachers.name) từ trang Cài Đặt + refresh state teacher tại chỗ.
+  // Cập nhật tên hiển thị (teachers.name) từ trang Cài đặt + refresh state teacher tại chỗ.
   async function updateTeacherName(name) {
     const uid = user?.id
     if (!uid) throw new Error('Chưa đăng nhập')

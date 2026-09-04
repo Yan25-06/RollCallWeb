@@ -151,12 +151,12 @@ export const ReviewForm = ({ open, onClose, editingReview, studentId, classId, t
     <Modal
       open={open}
       onClose={onClose}
-      title={isEdit ? 'Sửa Đánh Giá' : 'Thêm Đánh Giá'}
+      title={isEdit ? 'Sửa đánh giá' : 'Thêm đánh giá'}
       footer={
         <div className="flex justify-end gap-2">
           <Button variant="secondary" size="sm" onClick={onClose}>Hủy</Button>
           <Button variant="primary" size="sm" onClick={handleSubmit}>
-            {isEdit ? 'Cập nhật' : 'Lưu Đánh Giá'}
+            {isEdit ? 'Cập nhật' : 'Lưu đánh giá'}
           </Button>
         </div>
       }
@@ -189,7 +189,7 @@ export const ReviewForm = ({ open, onClose, editingReview, studentId, classId, t
 
         {/* Dynamic skill scores */}
         <div>
-          <p className="text-sm font-medium text-navy-700 mb-1.5">Điểm Kỹ Năng</p>
+          <p className="text-sm font-medium text-navy-700 mb-1.5">Điểm kỹ năng</p>
           <div className={`grid gap-2`} style={{ gridTemplateColumns: `repeat(${cols}, minmax(0, 1fr))` }}>
             {skills.map(skill => <ScoreInput key={skill.name} skill={skill} />)}
           </div>
@@ -197,7 +197,7 @@ export const ReviewForm = ({ open, onClose, editingReview, studentId, classId, t
 
         {/* Remark */}
         <div className="flex flex-col gap-1">
-          <label className="text-sm font-medium text-navy-700">Nhận Xét Thêm</label>
+          <label className="text-sm font-medium text-navy-700">Nhận xét thêm</label>
           <textarea
             className="input resize-none"
             rows={10}
@@ -209,7 +209,7 @@ export const ReviewForm = ({ open, onClose, editingReview, studentId, classId, t
 
         {/* Advice */}
         <div className="flex flex-col gap-1">
-          <label className="text-sm font-medium text-navy-700">Lời Khuyên Cá Nhân</label>
+          <label className="text-sm font-medium text-navy-700">Lời khuyên cá nhân</label>
           <textarea
             className="input resize-none"
             rows={5}

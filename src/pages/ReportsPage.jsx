@@ -145,7 +145,7 @@ const AttendanceCard = ({ classId }) => {
   return (
     <>
       <ReportCard
-        title="Điểm Danh theo tháng"
+        title="Điểm danh theo tháng"
         hasData={hasData}
         excelRows={tableRows}
         excelColumns={excelCols}
@@ -378,7 +378,7 @@ const FeesReportCard = ({ classId }) => {
   return (
     <>
       <ReportCard
-        title="Tổng thu Học Phí"
+        title="Tổng thu Học phí"
         hasData={hasData}
         excelRows={tableRows}
         excelColumns={excelCols}
@@ -534,7 +534,7 @@ const HomeworkProgressCard = ({ classId }) => {
 
   return (
     <ReportCard
-      title="Tiến độ Bài Tập"
+      title="Tiến độ Bài tập"
       hasData={hasData}
       excelRows={tableRows}
       excelColumns={excelCols}
@@ -577,7 +577,7 @@ export const ReportsPage = () => {
     <div className="flex flex-col gap-6 animate-fade-in">
       <div className="flex flex-col sm:flex-row sm:items-end gap-3 justify-between">
         <div>
-          <h1 className="text-2xl font-display font-bold text-navy-900">Báo Cáo</h1>
+          <h1 className="text-2xl font-display font-bold text-navy-900">Báo cáo</h1>
           <p className="text-sm text-navy-400 mt-0.5">Tổng hợp điểm danh, Mock Test, học phí và bài tập</p>
         </div>
         <div className="flex items-center gap-2">

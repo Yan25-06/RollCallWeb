@@ -63,7 +63,7 @@ export const HomeworkPanel = ({ studentId, classId, dateRange }) => {
     <div className="bg-white rounded-2xl border border-navy-100 shadow-navy-sm overflow-hidden">
       <div className="px-4 py-3 border-b border-navy-50 flex items-center justify-between">
         <div>
-          <p className="text-sm font-semibold text-navy-800">Bài Tập Theo Buổi</p>
+          <p className="text-sm font-semibold text-navy-800">Bài tập theo buổi</p>
           <p className="text-xs text-navy-400">
             {doneCount}/{total} buổi — <span className={`font-semibold ${pctColor}`}>{pct}% hiệu suất</span>
           </p>

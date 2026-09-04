@@ -154,13 +154,13 @@ export const RadarChartPanel = ({ reviews = [], skillConfig, onAddReview }) => {
     <div className="bg-white rounded-2xl border border-navy-100 shadow-navy-sm p-4">
       <div className="flex items-center justify-between mb-3">
         <div>
-          <p className="text-sm font-semibold text-navy-800">Biểu Đồ Năng Lực</p>
+          <p className="text-sm font-semibold text-navy-800">Biểu đồ năng lực</p>
           <p className="text-xs text-navy-400">{reviews.length} đợt đánh giá · chuẩn hóa 0–100%</p>
         </div>
         {onAddReview ? (
           <Button variant="secondary" size="sm" onClick={onAddReview} className="flex items-center gap-1.5">
             <PlusCircle size={13} />
-            Thêm Đánh Giá
+            Thêm đánh giá
           </Button>
         ) : (
           <span className="text-xs text-navy-400 italic">Tạo mock test trước</span>

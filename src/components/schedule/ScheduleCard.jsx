@@ -130,26 +130,17 @@ export const ScheduleCard = ({ item, cls, studentCount, showTeacher, onEdit, can
       )}
       onClick={() => onEdit?.(item)}
     >
-      {/* Header: course dot + class name + always-visible attendance chip */}
-      <div className="flex items-center gap-1.5 mb-1.5">
-        <span className={clsx('w-2 h-2 rounded-full shrink-0', color.dot)} />
-        <span className={clsx('text-xs font-semibold truncate', color.text)}>
-          {cls?.name ?? '—'}
-        </span>
-        {canCheckAttendance && (
-          <button
-            className={clsx(
-              'ml-auto shrink-0 inline-flex items-center gap-1 px-1.5 py-0.5 rounded-full text-xs font-semibold border transition-colors',
-              att.bg, att.text, att.border, 'hover:opacity-80'
-            )}
-            title={canMarkAbsent ? 'Bấm để đổi: Chưa xác nhận → Đã dạy → Vắng' : 'Bấm để đổi: Chưa xác nhận → Đã dạy'}
-            onClick={(e) => { e.stopPropagation(); onToggleAttendance?.(item) }}
-          >
-            <span className={clsx('w-1.5 h-1.5 rounded-full', att.dot)} />
-            {att.label}
-          </button>
-        )}
+      {/* Tên lớp — dòng riêng, chữ nổi nhất trên card: đây là thứ mắt quét tìm trong lưới 7 cột */}
+      <div className={clsx('text-sm font-bold leading-tight truncate', color.text)} title={cls?.name}>
+        {cls?.name ?? '—'}
       </div>
+
+      {/* Loại khóa bằng chữ thay cho chấm màu — màu nền card không phải kênh thông tin duy nhất */}
+      {cls?.courseType && (
+        <div className={clsx('text-[11px] font-medium uppercase tracking-wide truncate opacity-70 mb-1', color.text)}>
+          {cls.courseType}
+        </div>
+      )}
 
       {/* Teacher name — only shown in admin "all teachers" view */}
       {showTeacher && cls?.teacherName && (
@@ -168,7 +159,7 @@ export const ScheduleCard = ({ item, cls, studentCount, showTeacher, onEdit, can
       {item.room && (
         <div className={clsx('flex items-center gap-1 text-xs mt-0.5', color.text, 'opacity-80')}>
           <MapPin size={11} className="shrink-0" />
-          <span className="truncate">{item.room}</span>
+          <span className="truncate" title={item.room}>{item.room}</span>
         </div>
       )}
 
@@ -178,6 +169,21 @@ export const ScheduleCard = ({ item, cls, studentCount, showTeacher, onEdit, can
           <Users size={11} className="shrink-0" />
           <span>{studentCount} HV</span>
         </div>
+      )}
+
+      {/* Chip chấm công — hàng riêng dưới cùng, chiếm trọn bề ngang thay vì tranh chỗ với tên lớp */}
+      {canCheckAttendance && (
+        <button
+          className={clsx(
+            'mt-2 w-full inline-flex items-center justify-center gap-1 px-1 py-1 rounded-lg text-[11px] font-semibold border transition-colors',
+            att.bg, att.text, att.border, 'hover:opacity-80'
+          )}
+          title={canMarkAbsent ? 'Bấm để đổi: Chưa xác nhận → Đã dạy → Vắng' : 'Bấm để đổi: Chưa xác nhận → Đã dạy'}
+          onClick={(e) => { e.stopPropagation(); onToggleAttendance?.(item) }}
+        >
+          <span className={clsx('w-1.5 h-1.5 rounded-full shrink-0', att.dot)} />
+          <span className="truncate">{att.label}</span>
+        </button>
       )}
 
       {/* Khi Vắng: chọn người dạy thay + ghi chú (chỉ admin) */}
@@ -203,14 +209,9 @@ export const SubstituteCard = ({ assignment }) => {
   const color = getCourseColor() // default xám
   return (
     <div className={clsx('relative rounded-xl border p-2.5', color.bg, color.border)}>
-      <div className="flex items-center gap-1.5 mb-1.5">
-        <span className={clsx('w-2 h-2 rounded-full shrink-0', color.dot)} />
-        <span className={clsx('text-xs font-semibold truncate', color.text)}>
-          {assignment.className ?? '—'}
-        </span>
-        <span className="ml-auto shrink-0 inline-flex items-center px-1.5 py-0.5 rounded-full text-xs font-semibold bg-amber-100 text-amber-700 border border-amber-200">
-          Dạy thay
-        </span>
+      {/* Tên lớp — dòng riêng, giống ScheduleCard: nhãn "Dạy thay" không được tranh chỗ với danh tính */}
+      <div className={clsx('text-sm font-bold leading-tight truncate mb-1', color.text)} title={assignment.className}>
+        {assignment.className ?? '—'}
       </div>
       <div className={clsx('flex items-center gap-1 text-xs', color.text)}>
         <Clock size={11} className="shrink-0" />
@@ -219,12 +220,15 @@ export const SubstituteCard = ({ assignment }) => {
       {assignment.room && (
         <div className={clsx('flex items-center gap-1 text-xs mt-0.5', color.text, 'opacity-80')}>
           <MapPin size={11} className="shrink-0" />
-          <span className="truncate">{assignment.room}</span>
+          <span className="truncate" title={assignment.room}>{assignment.room}</span>
         </div>
       )}
       <div className={clsx('text-xs mt-0.5 truncate', color.text, 'opacity-70')}>
         Thay: {assignment.mainTeacherName ?? '—'}
       </div>
+      <span className="mt-2 w-full inline-flex items-center justify-center px-1.5 py-1 rounded-lg text-xs font-semibold bg-amber-100 text-amber-700 border border-amber-200">
+        Dạy thay
+      </span>
     </div>
   )
 }

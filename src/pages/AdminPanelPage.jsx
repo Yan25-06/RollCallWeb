@@ -180,7 +180,7 @@ export function AdminPanelPage() {
   return (
     <div className="space-y-8">
       <div>
-        <h1 className="text-2xl font-bold text-navy-900 mb-2">Bảng Điều Khiển Admin</h1>
+        <h1 className="text-2xl font-bold text-navy-900 mb-2">Bảng điều khiển Admin</h1>
         <p className="text-navy-600">Quản lý giáo viên và lớp học</p>
       </div>
 
@@ -218,7 +218,7 @@ export function AdminPanelPage() {
 
         {/* Left: Teachers */}
         <div className="space-y-3">
-          <h2 className="text-lg font-semibold text-navy-900">Giáo Viên</h2>
+          <h2 className="text-lg font-semibold text-navy-900">Giáo viên</h2>
 
           {loadingTeachers ? (
             <div className="flex justify-center py-8">
@@ -420,7 +420,7 @@ export function AdminPanelPage() {
               <h2 className="text-lg font-semibold text-navy-900">
                 {selectedTeacherId
                   ? `Lớp của ${teachers.find(t => t.id === selectedTeacherId)?.name || '...'}`
-                  : 'Tất Cả Lớp Học'}
+                  : 'Tất cả lớp học'}
               </h2>
               {selectedTeacherId && (
                 <p className="text-sm text-navy-500 mt-0.5">
@@ -507,7 +507,7 @@ export function AdminPanelPage() {
       <Modal
         open={showEditTeacherModal}
         onClose={() => setShowEditTeacherModal(false)}
-        title={`Đổi Giáo Viên cho Lớp ${selectedClass?.name}`}
+        title={`Đổi Giáo viên cho Lớp ${selectedClass?.name}`}
         footer={
           <div className="flex gap-3 justify-end">
             <Button variant="ghost" onClick={() => setShowEditTeacherModal(false)} size="sm">

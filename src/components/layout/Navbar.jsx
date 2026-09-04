@@ -12,12 +12,12 @@ import { usePermissions } from '@/hooks/usePermissions'
 
 const NAV_ITEMS = [
   { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard },
-  { id: 'classes', label: 'Lớp Học', icon: Users },
-  { id: 'students', label: 'Học Viên', icon: UserRound },
-  { id: 'fees', label: 'Học Phí', icon: BookOpen },
-  { id: 'reports', label: 'Báo Cáo', icon: BarChart2 },
-  { id: 'reviews', label: 'Nhận Xét', icon: GraduationCap },
-  { id: 'schedule', label: 'Giảng Dạy', icon: Calendar },
+  { id: 'classes', label: 'Lớp học', icon: Users },
+  { id: 'students', label: 'Học viên', icon: UserRound },
+  { id: 'fees', label: 'Học phí', icon: BookOpen },
+  { id: 'reports', label: 'Báo cáo', icon: BarChart2 },
+  { id: 'reviews', label: 'Nhận xét', icon: GraduationCap },
+  { id: 'schedule', label: 'Giảng dạy', icon: Calendar },
 ]
 
 export const Navbar = ({ activePage, onNavigate, centerName }) => {
@@ -25,7 +25,7 @@ export const Navbar = ({ activePage, onNavigate, centerName }) => {
   const { user, teacher, logout } = useAuth()
   const { isAdmin } = usePermissions()
 
-  // "Học Phí" chỉ hiển thị với admin
+  // "Học phí" chỉ hiển thị với admin
   const navItems = NAV_ITEMS.filter(item => item.id !== 'fees' || isAdmin)
 
   const handleLogout = async () => {
@@ -96,14 +96,14 @@ export const Navbar = ({ activePage, onNavigate, centerName }) => {
             )}
           >
             <Settings size={16} />
-            Cài Đặt
+            Cài đặt
           </button>
           <button
             onClick={handleLogout}
             className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium text-navy-300 hover:text-red-400 hover:bg-white/8 transition-all duration-200 w-full"
           >
             <LogOut size={16} />
-            Đăng Xuất
+            Đăng xuất
           </button>
         </div>
       </aside>
@@ -135,7 +135,7 @@ export const Navbar = ({ activePage, onNavigate, centerName }) => {
               </button>
             </div>
             <nav className="flex-1 px-3 py-4 flex flex-col gap-1 overflow-y-auto">
-              {[...navItems, ...(isAdmin ? [{ id: 'admin', label: 'Admin', icon: Shield }] : []), { id: 'settings', label: 'Cài Đặt', icon: Settings }].map(({ id, label, icon: Icon }) => (
+              {[...navItems, ...(isAdmin ? [{ id: 'admin', label: 'Admin', icon: Shield }] : []), { id: 'settings', label: 'Cài đặt', icon: Settings }].map(({ id, label, icon: Icon }) => (
                 <button
                   key={id}
                   onClick={() => { onNavigate(id); setMenuOpen(false) }}
@@ -153,7 +153,7 @@ export const Navbar = ({ activePage, onNavigate, centerName }) => {
                 className="flex items-center gap-3 px-3 py-3 rounded-xl text-sm font-medium text-navy-300 hover:text-red-400 hover:bg-white/8 transition-all w-full text-left"
               >
                 <LogOut size={17} />
-                Đăng Xuất
+                Đăng xuất
               </button>
             </nav>
           </div>

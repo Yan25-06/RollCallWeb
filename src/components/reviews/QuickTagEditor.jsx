@@ -66,7 +66,7 @@ export const QuickTagEditor = ({ value = [], onChange }) => {
       <div>
         <div className="flex items-center gap-1.5 mb-1.5">
           <ThumbsUp size={13} className="text-emerald-600" />
-          <span className="text-xs font-semibold text-emerald-700 uppercase tracking-wide">Tích Cực</span>
+          <span className="text-xs font-semibold text-emerald-700 uppercase tracking-wide">Tích cực</span>
         </div>
         <div className="flex flex-wrap gap-1.5">
           {POSITIVE_TAGS.map(tag => <TagPill key={tag} tag={tag} isPositive />)}
@@ -77,7 +77,7 @@ export const QuickTagEditor = ({ value = [], onChange }) => {
       <div>
         <div className="flex items-center gap-1.5 mb-1.5">
           <AlertTriangle size={13} className="text-amber-600" />
-          <span className="text-xs font-semibold text-amber-700 uppercase tracking-wide">Cần Cố Gắng</span>
+          <span className="text-xs font-semibold text-amber-700 uppercase tracking-wide">Cần cố gắng</span>
         </div>
         <div className="flex flex-wrap gap-1.5">
           {IMPROVE_TAGS.map(tag => <TagPill key={tag} tag={tag} isPositive={false} />)}

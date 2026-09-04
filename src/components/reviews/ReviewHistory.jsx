@@ -34,7 +34,7 @@ export const ReviewHistory = ({ reviews = [], skillConfig = [], onEdit, onDelete
   return (
     <div className="bg-white rounded-2xl border border-navy-100 shadow-navy-sm overflow-hidden">
       <div className="px-4 py-3 border-b border-navy-50">
-        <p className="text-sm font-semibold text-navy-800">Lịch Sử Đánh Giá</p>
+        <p className="text-sm font-semibold text-navy-800">Lịch sử đánh giá</p>
         <p className="text-xs text-navy-400">{reviews.length} đợt đánh giá</p>
       </div>
 

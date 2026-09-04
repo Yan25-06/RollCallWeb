@@ -370,7 +370,7 @@ export const StudentDetailPanel = ({ student, enrollment, onEdit, onStatusChange
             <span className="text-xs text-navy-400 font-medium uppercase tracking-wide">Buổi tiếp theo</span>
           </div>
           <span className="text-sm font-medium text-navy-600">Xem lịch</span>
-          <span className="text-xs text-navy-300">từ Schedule</span>
+          <span className="text-xs text-navy-300">từ thời khóa biểu</span>
         </div>
       </div>
 

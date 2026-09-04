@@ -122,7 +122,7 @@ export const ScheduleModal = ({ open, onClose, editingItem, defaultDay, classes 
     <Modal
       open={open}
       onClose={onClose}
-      title={isEdit ? 'Sửa Lịch Dạy' : 'Thêm Lịch Dạy'}
+      title={isEdit ? 'Sửa lịch dạy' : 'Thêm lịch dạy'}
       footer={
         <div className="flex items-center justify-between gap-2">
           {isEdit && (

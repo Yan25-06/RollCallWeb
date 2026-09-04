@@ -29,7 +29,7 @@ export const DailyAgenda = ({ todayItems = [], classes = [], studentCounts = new
         onClick={() => setCollapsed(c => !c)}
       >
         <div>
-          <p className="text-sm font-semibold text-navy-800">Hôm Nay</p>
+          <p className="text-sm font-semibold text-navy-800">Hôm nay</p>
           <p className="text-xs text-navy-400">{todayLabel}</p>
         </div>
         <div className="flex items-center gap-2">
@@ -63,11 +63,21 @@ export const DailyAgenda = ({ todayItems = [], classes = [], studentCounts = new
                 <div key={item.id} className="px-4 py-3 hover:bg-navy-50/50 transition-colors">
                   <div className="flex items-start justify-between gap-2">
                     <div className="flex items-start gap-2.5 min-w-0">
-                      <span className={clsx('w-2.5 h-2.5 rounded-full shrink-0 mt-1', color.dot)} />
                       <div className="min-w-0">
-                        <p className={clsx('text-sm font-semibold truncate', color.text)}>
-                          {cls?.name ?? '—'}
-                        </p>
+                        {/* Loại khóa hiện bằng badge có chữ thay cho chấm màu không chú giải */}
+                        <div className="flex items-center gap-2 min-w-0">
+                          <p className={clsx('text-sm font-semibold truncate', color.text)}>
+                            {cls?.name ?? '—'}
+                          </p>
+                          {cls?.courseType && (
+                            <span className={clsx(
+                              'shrink-0 px-1.5 py-0.5 rounded-md border text-[10px] font-semibold uppercase tracking-wide',
+                              color.bg, color.text, color.border
+                            )}>
+                              {cls.courseType}
+                            </span>
+                          )}
+                        </div>
                         {showTeacher && cls?.teacherName && (
                           <p className="text-xs text-navy-400 truncate">{cls.teacherName}</p>
                         )}

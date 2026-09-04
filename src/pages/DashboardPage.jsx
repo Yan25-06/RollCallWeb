@@ -136,7 +136,7 @@ export const DashboardPage = ({ year, month, onNavigate, onAttendance }) => {
         </div>
         <div className="cursor-pointer" onClick={() => onNavigate('classes')}>
           <StatCard
-            label="Lớp Học"
+            label="Lớp học"
             value={classes.length}
             sub="đang hoạt động"
             icon={<BookOpen size={16} />}
@@ -178,7 +178,7 @@ export const DashboardPage = ({ year, month, onNavigate, onAttendance }) => {
       <div className="grid lg:grid-cols-2 gap-6">
         <Card className="overflow-hidden">
           <div className="px-5 py-4 border-b border-navy-50 flex items-center justify-between">
-            <h2 className="font-semibold text-navy-800 text-sm">Danh Sách Học Sinh</h2>
+            <h2 className="font-semibold text-navy-800 text-sm">Danh sách học sinh</h2>
             <button
               onClick={() => onNavigate('students')}
               className="text-xs text-navy-500 hover:text-navy-800 font-medium transition-colors"
@@ -210,7 +210,7 @@ export const DashboardPage = ({ year, month, onNavigate, onAttendance }) => {
         {/* Classes */}
         <Card className="overflow-hidden">
           <div className="px-5 py-4 border-b border-navy-50 flex items-center justify-between">
-            <h2 className="font-semibold text-navy-800 text-sm">Các Lớp Học</h2>
+            <h2 className="font-semibold text-navy-800 text-sm">Các lớp học</h2>
             <button
               onClick={() => onNavigate('classes')}
               className="text-xs text-navy-500 hover:text-navy-800 font-medium transition-colors"
@@ -247,13 +247,13 @@ export const DashboardPage = ({ year, month, onNavigate, onAttendance }) => {
 
       {/* ── Quick actions ── */}
       <div>
-        <h2 className="text-sm font-semibold text-navy-600 uppercase tracking-wide mb-3">Thao Tác Nhanh</h2>
+        <h2 className="text-sm font-semibold text-navy-600 uppercase tracking-wide mb-3">Thao tác nhanh</h2>
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
           {[
-            { label: 'Điểm Danh',   page: 'classes',  accent: 'bg-navy-800 text-white' },
-            { label: 'Nhập Học Phí', page: 'fees',     accent: 'bg-emerald-700 text-white' },
-            { label: 'Nhận Xét HS', page: 'reviews',  accent: 'bg-amber-600 text-white' },
-            { label: 'Xem Lịch Dạy', page: 'schedule', accent: 'bg-navy-600 text-white' },
+            { label: 'Điểm danh',   page: 'classes',  accent: 'bg-navy-800 text-white' },
+            { label: 'Nhập học phí', page: 'fees',     accent: 'bg-emerald-700 text-white' },
+            { label: 'Nhận xét HS', page: 'reviews',  accent: 'bg-amber-600 text-white' },
+            { label: 'Xem lịch dạy', page: 'schedule', accent: 'bg-navy-600 text-white' },
           ].map(({ label, page, accent }) => (
             <button
               key={page}

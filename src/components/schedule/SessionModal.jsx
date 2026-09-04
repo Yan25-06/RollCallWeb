@@ -72,7 +72,7 @@ export const SessionModal = ({ open, onClose, monthId, editingItem, onSave, onDe
     <Modal
       open={open}
       onClose={onClose}
-      title={isEdit ? 'Sửa Buổi' : 'Thêm Buổi'}
+      title={isEdit ? 'Sửa buổi' : 'Thêm buổi'}
       footer={
         <div className="flex items-center justify-between gap-2">
           {isEdit && (

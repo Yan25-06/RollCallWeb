@@ -26,7 +26,7 @@ const PlaceholderPage = ({ icon: Icon, title, desc, phase }) => (
 export const AttendancePage = ({ year, month }) => (
   <PlaceholderPage
     icon={CalendarCheck}
-    title="Điểm Danh"
+    title="Điểm danh"
     desc={`Tháng ${month}/${year}`}
     phase="Phase 3"
   />

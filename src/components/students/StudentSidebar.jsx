@@ -66,30 +66,29 @@ export const StudentSidebar = ({
     <div className="flex flex-col h-full bg-white border border-navy-100 rounded-2xl overflow-hidden shadow-navy-sm">
       {/* Sidebar header */}
       <div className="px-4 pt-4 pb-3 border-b border-navy-50">
-        <div className="flex items-center justify-between mb-3">
-          <span className="text-sm font-semibold text-navy-800 flex items-center gap-1.5">
-            <Users size={14} className="text-navy-500" />
-            Danh sách học viên
-          </span>
-          <div className="flex items-center gap-1.5">
+        {/* Tiêu đề chiếm trọn một hàng — trước đây bị 2 nút chen chỗ nên gãy xuống 2 dòng */}
+        <span className="flex items-center gap-1.5 text-sm font-semibold text-navy-800 mb-2.5">
+          <Users size={14} className="shrink-0 text-navy-500" />
+          Danh sách học viên
+        </span>
+        <div className="flex items-center gap-1.5 mb-3">
+          <button
+            id="add-student-btn"
+            onClick={onAddStudent}
+            className="flex-1 flex items-center justify-center gap-1 px-2.5 py-1.5 bg-navy-800 text-white text-xs font-medium rounded-lg hover:bg-navy-700 transition-colors whitespace-nowrap"
+          >
+            <Plus size={12} className="shrink-0" />
+            Thêm
+          </button>
+          {isAdmin && (
             <button
-              id="add-student-btn"
-              onClick={onAddStudent}
-              className="flex items-center gap-1 px-2.5 py-1.5 bg-navy-800 text-white text-xs font-medium rounded-lg hover:bg-navy-700 transition-colors"
+              id="create-student-btn"
+              onClick={onCreateStudent}
+              className="flex-1 px-2.5 py-1.5 border border-navy-200 text-navy-600 text-xs font-medium rounded-lg hover:bg-navy-50 transition-colors whitespace-nowrap"
             >
-              <Plus size={12} />
-              Thêm
+              Tạo mới
             </button>
-            {isAdmin && (
-              <button
-                id="create-student-btn"
-                onClick={onCreateStudent}
-                className="px-2.5 py-1.5 border border-navy-200 text-navy-600 text-xs font-medium rounded-lg hover:bg-navy-50 transition-colors"
-              >
-                Tạo mới
-              </button>
-            )}
-          </div>
+          )}
         </div>
 
         {/* Search */}
@@ -108,13 +107,14 @@ export const StudentSidebar = ({
         </div>
 
         {/* Filter tabs */}
-        <div className="flex gap-0.5 mt-3">
+        {/* Lưới 2 cột: 4 chip xếp một hàng làm nhãn "Tạm ngừng" gãy đôi ở bề ngang sidebar */}
+        <div className="grid grid-cols-2 gap-1 mt-3">
           {FILTER_TABS.map(tab => (
             <button
               key={tab.id}
               onClick={() => setFilterStatus(tab.id)}
               className={clsx(
-                'flex-1 py-1 text-xs font-medium rounded-lg transition-all',
+                'py-1 text-xs font-medium rounded-lg transition-all whitespace-nowrap',
                 filterStatus === tab.id
                   ? 'bg-navy-800 text-white'
                   : 'text-navy-500 hover:text-navy-700 hover:bg-navy-50'
@@ -127,11 +127,12 @@ export const StudentSidebar = ({
 
         {/* Count summary */}
         <div className="flex items-center gap-2 mt-2 text-xs text-navy-400">
-          <span className="text-emerald-600 font-semibold">{counts.active}</span>
+          {/* Con số trần không nói lên gì — thêm tooltip cho từng trạng thái */}
+          <span className="text-emerald-600 font-semibold" title="Đang học">{counts.active}</span>
           <span>·</span>
-          <span className="text-amber-600 font-semibold">{counts.paused}</span>
+          <span className="text-amber-600 font-semibold" title="Tạm ngừng">{counts.paused}</span>
           <span>·</span>
-          <span className="text-gray-500 font-semibold">{counts.dropped}</span>
+          <span className="text-gray-500 font-semibold" title="Đã nghỉ">{counts.dropped}</span>
           <span className="ml-auto">{filtered.length} kết quả</span>
         </div>
       </div>

@@ -38,7 +38,7 @@ export const ReviewSelector = ({
     <div className="flex flex-col gap-4">
       {/* Class pills */}
       <div>
-        <p className="text-xs font-semibold text-navy-500 uppercase tracking-wide mb-2">Chọn Lớp</p>
+        <p className="text-xs font-semibold text-navy-500 uppercase tracking-wide mb-2">Chọn lớp</p>
         <div className="flex flex-wrap gap-2">
           {classes.map(cls => (
             <button
@@ -60,7 +60,7 @@ export const ReviewSelector = ({
       {/* Student list */}
       {selectedClassId && (
         <div className="flex flex-col gap-2">
-          <p className="text-xs font-semibold text-navy-500 uppercase tracking-wide">Chọn Học Viên</p>
+          <p className="text-xs font-semibold text-navy-500 uppercase tracking-wide">Chọn học viên</p>
 
           {/* Search */}
           <div className="relative">

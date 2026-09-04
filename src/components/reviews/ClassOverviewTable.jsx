@@ -158,7 +158,7 @@ export const ClassOverviewTable = ({ classId, cls, dateRange, mocksByStudent = n
     ws['!cols'] = [{ wch: 28 }, { wch: 14 }, { wch: 12 }, { wch: 14 }, { wch: 10 }, { wch: 40 }]
 
     const wb = XLSX.utils.book_new()
-    XLSX.utils.book_append_sheet(wb, ws, 'Tổng Quan Lớp')
+    XLSX.utils.book_append_sheet(wb, ws, 'Tổng quan lớp')
 
     const className = cls?.name?.replace(/\s+/g, '-') ?? 'lop'
     XLSX.writeFile(wb, `tong-quan-${className}-${dateRange.fromDate}-${dateRange.toDate}.xlsx`)

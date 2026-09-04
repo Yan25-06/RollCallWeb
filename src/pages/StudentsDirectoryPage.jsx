@@ -401,7 +401,7 @@ export const StudentsDirectoryPage = ({ onNavigateToClass, isAdmin = false }) =>
       <div className={clsx('flex flex-col gap-4 flex-1 min-w-0', selectedStudent && 'hidden lg:flex')}>
         {/* Header */}
         <div>
-          <h1 className="text-2xl font-bold text-navy-900">Danh Bạ Học Viên</h1>
+          <h1 className="text-2xl font-bold text-navy-900">Danh bạ học viên</h1>
           <p className="text-sm text-navy-500 mt-1">Toàn bộ học sinh — lọc, tìm kiếm và quản lý tập trung</p>
         </div>
 

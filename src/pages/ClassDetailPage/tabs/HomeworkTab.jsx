@@ -222,7 +222,7 @@ export const HomeworkTab = ({ classId, scheduleTime }) => {
             <Card className="p-16 flex flex-col items-center justify-center text-center gap-3">
               <FileText size={48} className="text-navy-200" />
               <p className="font-semibold text-navy-700">Chưa có buổi học nào</p>
-              <p className="text-sm text-navy-400">Tạo buổi đầu tiên ở tab Điểm Danh hoặc thêm tại đây</p>
+              <p className="text-sm text-navy-400">Tạo buổi đầu tiên ở tab Điểm danh hoặc thêm tại đây</p>
               <Button onClick={() => setSessionModalOpen(true)} className="mt-2">+ Tạo buổi học</Button>
             </Card>
           ) : students.length === 0 ? (

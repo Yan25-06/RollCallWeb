@@ -53,7 +53,7 @@ export const MonthModal = ({ open, onClose, editingItem, onSave, onDelete }) => 
     <Modal
       open={open}
       onClose={onClose}
-      title={isEdit ? 'Sửa Tháng' : 'Thêm Tháng'}
+      title={isEdit ? 'Sửa tháng' : 'Thêm tháng'}
       footer={
         <div className="flex items-center justify-between gap-2">
           {isEdit && (

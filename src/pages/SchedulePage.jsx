@@ -288,7 +288,7 @@ export const SchedulePage = ({ onNavigate }) => {
       {/* ── Page Header ─────────────────────────────── */}
       <div className="flex items-start justify-between gap-4 flex-wrap">
         <div>
-          <h1 className="text-2xl font-display font-bold text-navy-900">Giảng Dạy</h1>
+          <h1 className="text-2xl font-display font-bold text-navy-900">Giảng dạy</h1>
           <p className="text-sm text-navy-400 mt-0.5">Thời khóa biểu, chấm công và lương giáo viên</p>
         </div>
         {activeTab === 'schedule' && (
@@ -299,7 +299,7 @@ export const SchedulePage = ({ onNavigate }) => {
             className="flex items-center gap-2 shrink-0"
           >
             <Plus size={16} />
-            Xếp Lịch
+            Xếp lịch
           </Button>
         )}
       </div>
@@ -315,7 +315,7 @@ export const SchedulePage = ({ onNavigate }) => {
               : 'border-transparent text-navy-400 hover:text-navy-700'
           )}
         >
-          Lịch Dạy
+          Lịch dạy
         </button>
         <button
           onClick={() => setActiveTab('payroll')}
@@ -326,7 +326,7 @@ export const SchedulePage = ({ onNavigate }) => {
               : 'border-transparent text-navy-400 hover:text-navy-700'
           )}
         >
-          Bảng Lương
+          Bảng lương
         </button>
         <button
           onClick={() => setActiveTab('materials')}
@@ -337,7 +337,7 @@ export const SchedulePage = ({ onNavigate }) => {
               : 'border-transparent text-navy-400 hover:text-navy-700'
           )}
         >
-          Tài Liệu
+          Tài liệu
         </button>
       </div>
 
@@ -405,8 +405,15 @@ export const SchedulePage = ({ onNavigate }) => {
                 const color = getCourseColor(cls?.courseType)
                 return (
                   <div key={item.id} className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-navy-50 text-xs">
-                    <span className={clsx('w-2 h-2 rounded-full shrink-0', color.dot)} />
                     <span className="font-medium text-navy-800">{cls?.name ?? '—'}</span>
+                    {cls?.courseType && (
+                      <span className={clsx(
+                        'shrink-0 px-1.5 rounded-md border text-[10px] font-semibold uppercase tracking-wide',
+                        color.bg, color.text, color.border
+                      )}>
+                        {cls.courseType}
+                      </span>
+                    )}
                     <span className="text-navy-400">{fmtTime(item.startTime)}–{fmtTime(item.endTime)}</span>
                     {item.room && <span className="text-navy-400">· {item.room}</span>}
                     <button
@@ -456,11 +463,11 @@ export const SchedulePage = ({ onNavigate }) => {
                   <Empty
                     icon={<Calendar size={40} />}
                     title={selectedTeacherId ? 'Giáo viên này chưa có lịch dạy' : 'Chưa có lịch dạy nào'}
-                    desc={selectedTeacherId ? 'Thử chọn giáo viên khác hoặc bấm "+ Xếp Lịch".' : "Bấm '+ Xếp Lịch' để thêm ca dạy đầu tiên vào thời khóa biểu."}
+                    desc={selectedTeacherId ? 'Thử chọn giáo viên khác hoặc bấm "+ Xếp lịch".' : "Bấm '+ Xếp lịch' để thêm ca dạy đầu tiên vào thời khóa biểu."}
                     action={
                       <Button variant="primary" size="sm" onClick={() => openAdd(null)} className="flex items-center gap-1.5">
                         <Plus size={14} />
-                        Xếp Lịch Đầu Tiên
+                        Xếp lịch đầu tiên
                       </Button>
                     }
                   />

@@ -68,7 +68,7 @@ export const MaterialModal = ({ open, onClose, editingItem, onSave, onDelete }) 
     <Modal
       open={open}
       onClose={onClose}
-      title={isEdit ? 'Sửa Tài Liệu' : 'Thêm Tài Liệu'}
+      title={isEdit ? 'Sửa tài liệu' : 'Thêm tài liệu'}
       footer={
         <div className="flex items-center justify-between gap-2">
           {isEdit && (

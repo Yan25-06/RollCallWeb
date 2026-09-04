@@ -122,7 +122,7 @@ export const FeesPage = ({ year, month }) => {
       {/* Header */}
       <div className="flex items-center justify-between gap-4 flex-wrap">
         <div>
-          <h1 className="text-2xl font-display font-bold text-navy-900">Học Phí</h1>
+          <h1 className="text-2xl font-display font-bold text-navy-900">Học phí</h1>
           <p className="text-sm text-navy-400 mt-0.5">
             Tháng {month}/{year}
           </p>
@@ -180,17 +180,25 @@ export const FeesPage = ({ year, month }) => {
       {/* Filters: class + payment status */}
       {!loading && rows.length > 0 && (
         <div className="flex flex-wrap items-center gap-3">
+          {/* Dropdown có nhãn riêng + vạch ngăn: trước đây nó cùng hình pill với dãy tab bên cạnh
+              nên trông như tab thứ năm, dù một cái mở menu còn bốn cái kia lọc tại chỗ. */}
           {uniqueClassNames.length > 0 && (
-            <Select
-              value={classFilter}
-              onChange={e => setClassFilter(e.target.value)}
-              className="text-sm w-auto"
-            >
-              <option value="all">Tất cả lớp</option>
-              {uniqueClassNames.map(name => (
-                <option key={name} value={name}>{name}</option>
-              ))}
-            </Select>
+            <>
+              <label className="flex items-center gap-2">
+                <span className="text-sm font-medium text-navy-700">Lớp:</span>
+                <Select
+                  value={classFilter}
+                  onChange={e => setClassFilter(e.target.value)}
+                  className="text-sm w-auto"
+                >
+                  <option value="all">Tất cả lớp</option>
+                  {uniqueClassNames.map(name => (
+                    <option key={name} value={name}>{name}</option>
+                  ))}
+                </Select>
+              </label>
+              <span className="hidden sm:block w-px h-6 bg-navy-200 shrink-0" aria-hidden="true" />
+            </>
           )}
           <div className="flex gap-1 flex-wrap">
           {PAYMENT_TABS.map(tab => (

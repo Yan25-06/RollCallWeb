@@ -257,7 +257,7 @@ export const ClassModal = ({ open, onClose, classItem = null, onSave, isAdmin = 
         {/* Skill config builder */}
         <div className="flex flex-col gap-2">
           <div className="flex justify-between items-center">
-            <label className="text-sm font-medium text-navy-700">Cấu Hình Kỹ Năng</label>
+            <label className="text-sm font-medium text-navy-700">Cấu hình kỹ năng</label>
             <span className="text-xs text-navy-400">Dùng cho đánh giá & mock test</span>
           </div>
           <MockTestSectionBuilder sections={skillSections} onChange={setSkillSections} showMaxScore={false} />

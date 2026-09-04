@@ -322,7 +322,7 @@ export const ReviewsPage = ({ settings = {} }) => {
       {/* Page header */}
       <div className="flex items-start justify-between gap-4 flex-wrap">
         <div>
-          <h1 className="text-2xl font-display font-bold text-navy-900">Nhận Xét Học Viên</h1>
+          <h1 className="text-2xl font-display font-bold text-navy-900">Nhận xét học viên</h1>
           <p className="text-sm text-navy-400 mt-0.5">Đánh giá năng lực và xuất phiếu kết quả</p>
         </div>
         <div className="flex items-center gap-2 shrink-0">
@@ -333,7 +333,7 @@ export const ReviewsPage = ({ settings = {} }) => {
               className="flex items-center gap-2"
             >
               <Archive size={16} />
-              Xuất Tất Cả
+              Xuất tất cả
             </Button>
           )}
           {hasStudentSelected && viewMode === 'individual' && (
@@ -370,7 +370,7 @@ export const ReviewsPage = ({ settings = {} }) => {
               viewMode === 'overview' ? 'bg-white text-navy-800 shadow-sm' : 'text-navy-500 hover:text-navy-700'
             )}
           >
-            <Users size={14} /> Tổng Quan Lớp
+            <Users size={14} /> Tổng quan lớp
           </button>
         </div>
 
@@ -407,7 +407,7 @@ export const ReviewsPage = ({ settings = {} }) => {
         {viewMode === 'individual' && (
           <div className="w-full lg:w-64 shrink-0 bg-white rounded-2xl border border-navy-100 shadow-navy-sm overflow-hidden">
             <div className="px-4 py-3 border-b border-navy-50">
-              <p className="text-xs font-semibold text-navy-500 uppercase tracking-wide">Học Viên</p>
+              <p className="text-xs font-semibold text-navy-500 uppercase tracking-wide">Học viên</p>
             </div>
             <StudentList
               students={students}

@@ -118,7 +118,7 @@ export const ClassesOverviewPage = ({ onSelectClass }) => {
   if (error) {
     return (
       <div className="flex flex-col gap-4 animate-fade-in">
-        <h1 className="text-2xl font-display font-bold text-navy-900">Lớp Học</h1>
+        <h1 className="text-2xl font-display font-bold text-navy-900">Lớp học</h1>
         <Card className="p-8 text-center">
           <p className="text-red-600 font-medium">Lỗi tải dữ liệu</p>
           <p className="text-sm text-navy-400 mt-1">{error}</p>
@@ -132,7 +132,7 @@ export const ClassesOverviewPage = ({ onSelectClass }) => {
     <div className="flex flex-col gap-6 animate-fade-in">
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div>
-          <h1 className="text-2xl font-display font-bold text-navy-900">Lớp Học</h1>
+          <h1 className="text-2xl font-display font-bold text-navy-900">Lớp học</h1>
           <p className="text-sm text-navy-400 mt-0.5">Quản lý danh sách lớp học</p>
         </div>
 

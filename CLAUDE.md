@@ -162,16 +162,7 @@ src/
 
 ---
 
-## OpenSpec workflow
-Project quản lý thay đổi qua OpenSpec (`openspec/`). Có skill tích hợp: `openspec-propose`, `openspec-apply-change`, `openspec-archive-change`, `openspec-explore`.
-- `openspec/specs/` — spec hiện hành (đã build). `openspec/changes/` — change đang làm; `openspec/changes/archive/` — đã xong.
-- `openspec/ROADMAP.md` — lộ trình migration Supabase multi-teacher (nguồn chân lý cho thứ tự các change service layer).
-- Change đang mở (chưa archive): `add-supabase-multi-teacher` (reference gốc — có thể xóa sau khi confirm `add-admin-panel` hoạt động).
-- Đã archive: `add-service-fees` (2026-06-02), `add-service-reviews` (2026-06-02), `add-service-tests-settings` (2026-06-03), `add-admin-panel` (2026-06-03), **`add-class-skill-config` (2026-06-03)**, **`improve-review-fee-ux` (2026-06-07)**.
-- Một change gồm `proposal.md`, `design.md`, `specs/`, `tasks.md`. Implement theo tasks, check `[x]` khi xong, không làm ngoài scope.
-- **Lộ trình multi-teacher hoàn tất**: tất cả service layer sẵn sàng, admin panel đã triển khai, mời giáo viên qua Supabase Dashboard.
-
-## Quyết định kiến trúc đã chốt (từ ROADMAP)
+## Quyết định kiến trúc đã chốt
 - RLS enforce ở PostgreSQL, **không** filter quyền ở frontend.
 - **Admin toàn quyền ghi** (migration `20260604000001_admin_full_write_access.sql`): admin có INSERT/UPDATE/DELETE trên TẤT CẢ bảng nghiệp vụ (không giới hạn `teacher_id`) — admin cũng đứng lớp như giáo viên. Cách làm: thêm policy admin **độc lập** điều kiện `is_admin()` song song policy teacher (Postgres OR-combine permissive policy → policy teacher giữ nguyên). `classes` đã có policy admin write từ trước nên KHÔNG thêm lại. Rollback = drop riêng các policy `"<table>: admin insert/update/delete"`.
 - **Teacher read-only `students` + `mock_tests`** (migration `20260605000001_restrict_teacher_students_mocktests.sql`): giáo viên thường **mất** INSERT/UPDATE/DELETE trên bảng `students` và `mock_tests` (đề Mock Test), chỉ còn SELECT. Drop 3 policy `"students: teacher insert/update/delete"` + 3 policy `"mock_tests: teacher insert/update/delete"`; giữ policy SELECT của teacher và toàn bộ policy admin. `mock_test_results` (nhập điểm) và mọi bảng nghiệp vụ khác (điểm danh, bài tập, nhận xét, `enrollments`...) **không đổi** — teacher vẫn ghi được. Rollback = re-create 6 policy đã drop (nội dung gốc trong `20260602000001`).

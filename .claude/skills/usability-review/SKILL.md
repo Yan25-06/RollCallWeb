@@ -28,7 +28,7 @@ cần "không vỡ" ở 768px và 375px, không phải mục tiêu tối ưu.
 
 ## Hard rules
 
-1. **No meaning by colour alone.** Add a second channel — icon, underline, weight, or text. See `references/visual-design.md` for contrast and `references/interface-principles.md` for accessibility. Reference implementations: `src/components/mock-test/MockTestScoreTable.jsx` (`ScoreCell` — min/max clamp with a toast explaining *why*, plus a `title` tooltip) and `src/components/reviews/RadarChartPanel.jsx` (replaces the hidden "Thêm Đánh Giá" button with explanatory text instead of just removing it). See `docs/usability-audit-2026-09-04.md` for how these were verified.
+1. **No meaning by colour alone.** Add a second channel — icon, underline, weight, or text. Motion is **not** a valid second channel (reduced-motion users lose it). See `references/visual-design.md` for contrast and `references/interface-principles.md` for accessibility. Reference implementation: `src/components/attendance/AttendanceToggle.jsx` — attendance status pairs colour (emerald/red) with a text label ("Có mặt"/"Vắng") on the same badge, never colour alone. The 2026-09-04 audit did not find a genuine second example elsewhere in the app; see `docs/usability-audit-2026-09-04.md`.
 2. **Không được mất dữ liệu đang nhập.** Form dài — điểm danh cả lớp, nhập điểm mock test cả
    lớp, phiếu nhận xét — không được mất khi lỡ đóng modal, bấm Esc, hay rớt mạng. App có
    `OfflineBanner` và `utils/retryQueue.js`, nên mất mạng giữa chừng là tình huống có thật,
@@ -65,7 +65,7 @@ cần "không vỡ" ở 768px và 375px, không phải mục tiêu tối ưu.
 - [ ] Forms: one column, labels consistent, required marked, pre-validated
 - [ ] Interactive rows: signifiers (chevron, drag, checkbox, hover)
 - [ ] Scannable text: keywords, lists, one idea per block, links front-loaded
-- [ ] Labels use user's words (EN & VI)
+- [ ] Labels use user's words, tiếng Việt — không có tiếng Anh hay tên cột database rò ra nhãn
 - [ ] Apple's four: good, bad, missing, superfluous
 - [ ] (`CLAUDE.md`) navy tokens, `@/components/ui`, lucide icons, `clsx`, Skeleton/Empty, toast after actions, responsive at 1280/768/375px
 

@@ -20,8 +20,7 @@ sao người dùng nhầm + trang/file cụ thể. Phát hiện nào chỉ xác 
 
 | # | Heuristic | Sev | Fix | Vấn đề | File |
 |---|---|---|---|---|---|
-| 1 | H2-4 Consistency | 3 | 1 | Trạng thái "Còn nợ/Đã đóng" tính khác nhau ở 2 nơi cho học phí kỳ vọng = 0đ | `src/components/fees/FeesTable.jsx:11-12`, `src/pages/FeesPage.jsx:15-17` |
-| 2 | H2-4 Consistency | 2 | 0 | Nhãn tiếng Anh "từ Schedule" rò ra giữa UI toàn tiếng Việt | `src/components/students/StudentDetailPanel.jsx:373` |
+| 1 | H2-4 Consistency | 3 | 1 | `FeesTable.jsx` thiếu nhánh "học phí kỳ vọng = 0đ" mà `FeesPage.jsx` đã có, khiến badge dòng đó hiện sai "Còn nợ" | `src/components/fees/FeesTable.jsx:11-12`, `src/pages/FeesPage.jsx:13-18` |
 
 ## Toàn bộ phát hiện theo severity
 
@@ -40,18 +39,26 @@ luồng nghiệp vụ cốt lõi.
 if (paid <= 0) return { label: 'Còn nợ', variant: 'danger' }
 if (paid >= expected) return { label: 'Đã đóng', variant: 'success' }
 ```
-trong khi `src/pages/FeesPage.jsx` dòng 15-17 — dùng để đếm số liệu tab lọc và summary
-card — tính theo thứ tự ngược lại:
+— **không xét `expected` trước khi xét `paid`**. Trong khi đó `src/pages/FeesPage.jsx`
+dòng 13-18 — dùng để đếm số liệu tab lọc và summary card — đã xử lý đúng trường hợp
+này bằng một nhánh riêng đứng đầu:
 ```js
-if (paid >= expected) return 'paid'
-if (paid > 0) return 'partial'
-return 'debt'
+const getPaymentStatus = (paid, expected) => {
+  if (expected <= 0) return 'free'
+  if (paid >= expected) return 'paid'
+  if (paid > 0) return 'partial'
+  return 'debt'
+}
 ```
-Khi `expected = 0` (học phí tháng chưa cấu hình, hoặc enrollment miễn phí) và
-`paid = 0`: `FeesTable` cho `0 <= 0` đúng trước → hiện badge đỏ "Còn nợ". `FeesPage`
-cho `0 >= 0` đúng trước → xếp vào nhóm `'paid'`, **không đếm** vào tab "Còn nợ" hay
-summary "Còn nợ". Hai con số ngay trên cùng một màn hình mâu thuẫn nhau: badge trên
-dòng nói "Còn nợ", nhưng số đếm tab "Còn nợ" không tính dòng đó.
+(nhãn `'free'` hiển thị là "Miễn phí", `STATUS_LABELS.free` dòng 31). Khi
+`expected = 0` (học phí tháng chưa cấu hình, hoặc enrollment miễn phí) và
+`paid = 0`: `FeesTable` cho `0 <= 0` đúng ngay ở nhánh đầu tiên → hiện badge đỏ
+"Còn nợ". `FeesPage.getPaymentStatus` cùng dữ liệu lại trả về `'free'` — không đếm
+vào tab "Còn nợ" (`tabCounts.debt`) lẫn tab "Đã đóng đủ". Hai nơi tính cùng một khái
+niệm "trạng thái học phí" theo hai công thức khác nhau: `FeesTable.jsx` chưa được cập
+nhật theo cùng logic 4 nhánh (`free`/`paid`/`partial`/`debt`) mà `FeesPage.jsx` đã có
+— nghĩa là bug nằm ở `FeesTable.jsx` thiếu nhánh `free`, không phải hai file "ngược
+thứ tự" như đọc lướt qua có thể tưởng.
 
 Quan sát trực tiếp trên dữ liệu thật: học viên "Kim Khánh" (lớp T02, tháng 9/2026)
 có "Học phí kỳ vọng: 0đ", "Đã đóng: 0đ", badge "Còn nợ" — đúng kịch bản trên (shots
@@ -62,9 +69,10 @@ nhắc phụ huynh dù thực tế không có gì để thu; hoặc nếu 0đ l�
 `monthly_fee` (lỗi cấu hình thật), badge "Còn nợ" trông giống mọi dòng nợ bình thường
 khác nên lỗi cấu hình bị che giấu thay vì được làm nổi bật.
 
-**Fix:** hợp nhất về một hàm `getPaymentStatus(paid, expected)` dùng chung ở cả hai
-file, kiểm tra `expected <= 0` trước tiên và trả về trạng thái riêng (hoặc `'paid'`)
-thay vì để rơi vào nhánh `paid <= 0`.
+**Fix:** import và dùng lại `getPaymentStatus` đã có sẵn ở `src/pages/FeesPage.jsx`
+trong `FeesTable.jsx` thay vì tính badge bằng logic riêng — xóa hẳn phép tính trùng
+lặp ở dòng 11-12, map trạng thái `'free'` sang một badge trung tính (VD "Miễn phí",
+màu xám) thay vì rơi vào nhánh "Còn nợ".
 
 ---
 
@@ -224,9 +232,15 @@ bằng nhiều hơn một kênh hoặc xử lý đúng theo hard rule:
 - **`src/components/fees/PaymentModal.jsx` (dòng 61-65):** tự động chọn sẵn lớp khi
   học viên chỉ có đúng 1 enrollment đang active (`classIds.length === 1 ? classIds[0] : ''`)
   — giảm đúng 1 click cho trường hợp phổ biến nhất mà không ảnh hưởng trường hợp đa lớp.
+- **`src/components/attendance/AttendanceToggle.jsx` (dòng 14-16):** trạng thái điểm
+  danh ghép màu (emerald/red) với nhãn chữ ("Có mặt"/"Vắng") ngay trên cùng badge —
+  đúng hard rule 1 (không dùng màu làm kênh thông tin duy nhất). Đây là ví dụ rule-1
+  duy nhất tìm được trong đợt audit này; không có ví dụ thứ hai đạt chuẩn tương đương.
 
-**Reference implementations cho rule 1** (đã cập nhật lại trong `SKILL.md` ở Task 7):
-`MockTestScoreTable.jsx` (ScoreCell) và `RadarChartPanel.jsx`.
+**Reference implementation cho rule 1** (đã cập nhật lại trong `SKILL.md` ở Task 7):
+`AttendanceToggle.jsx`. `MockTestScoreTable.jsx` và `RadarChartPanel.jsx` ở trên minh
+họa rule 12 và H2-9 tương ứng — không phải rule 1, dù đều là ví dụ tốt cho hard rule
+riêng của chúng.
 
 ## Giới hạn của báo cáo
 

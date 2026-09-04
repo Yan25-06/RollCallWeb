@@ -1,9 +1,9 @@
 ---
 name: usability-review
-description: Use when designing, reviewing, or changing any DictationHub screen, flow, dialog, form, error message, empty state, or feedback colour - and when deciding whether a proposed feature is worth building.
+description: Use when designing, reviewing, or changing any screen, flow, dialog, form, error message, empty state, or status colour in this CRM - and when deciding whether a proposed feature is worth building.
 ---
 
-# Usability Review (DictationHub)
+# Usability Review (Anh Ngữ Ms.Phương CRM)
 
 `CLAUDE.md` covers how the UI **looks**; this covers how it **behaves**.
 
@@ -13,25 +13,32 @@ satisfaction, in a specified context of use** (ISO 9241-11) — never absolute, 
 
 ## First, name the user
 
-| | **Teacher** (`/teacher/*`, `features/teacher-content`, `features/content-create`) | **Student** (`LibraryPage`, `PracticePage`, `PartPracticePage`, `student/*`) |
+| | **Admin** (`AdminPanelPage`, `FeesPage`, `ReportsPage`, `PayrollTab`) | **Giáo viên** (`AttendanceTab`, `HomeworkTab`, `ReviewsPage`, `MockTestTab`) |
 |---|---|---|
-| Usage | Frequent, repetitive, high-volume | Infrequent, short sessions |
-| Optimise for | **Efficiency** — fewest clicks, shortcuts, bulk actions, defaults | **Learnability + Memorability** — obvious affordances, visible next step |
-| Error cost | High (destroys content) → confirm + undo | Low (a wrong answer) → instant cheap recovery, never a modal |
+| Usage | Dày, hàng ngày, khối lượng lớn | Theo đợt, sau giờ dạy, cách quãng nhiều ngày |
+| Device | Desktop | Desktop |
+| Optimise for | **Efficiency** — ít click, bulk action, default tốt, phím tắt | **Memorability** — nghỉ một tuần quay lại vẫn làm được ngay, không cần đọc lại hướng dẫn |
+| Error cost | Cao (sai tiền, sai phân quyền) → confirm + hoàn tác | Trung bình (sai điểm, sai điểm danh) → sửa tại chỗ, không modal |
 
-Before adding a click to a teacher flow, check it isn't friction repeated fifty times.
-Before removing a label or hint from a student flow, check a first-timer can still proceed.
-Don't forget the middle case: a **returning student** knows the app but has forgotten the
-specifics, and needs memorability above all.
+Trước khi thêm một click vào luồng của admin, kiểm tra xem đó có phải là ma sát lặp lại
+năm mươi lần không.
+Trước khi bỏ một nhãn hay gợi ý khỏi luồng của giáo viên, kiểm tra xem người quay lại sau
+hai tuần còn đi tiếp được không.
+
+**Không có người dùng mobile-primary, không có phụ huynh hay học viên đăng nhập.** Mobile chỉ
+cần "không vỡ" ở 768px và 375px, không phải mục tiêu tối ưu.
 
 ## Hard rules
 
 1. **No meaning by colour alone.** 7–8% of men can't distinguish red from green. Correct vs.
    incorrect needs a second channel — icon, underline, weight, or text. Motion is **not** a
    valid second channel: readers with reduced motion enabled lose it entirely. Reference
-   implementations: `GapSentence.jsx` (icon + weight), `AnswerHistory.jsx` and
-   `ResultView.jsx` (underline + weight).
-2. **No meaning by audio alone.** Keep visible state for everything the sound conveys.
+   implementations: *chưa xác định — điền sau khi audit (Task 7) tìm được component
+   đạt chuẩn trong repo này.*
+2. **Không được mất dữ liệu đang nhập.** Form dài — điểm danh cả lớp, nhập điểm mock test cả
+   lớp, phiếu nhận xét — không được mất khi lỡ đóng modal, bấm Esc, hay rớt mạng. App có
+   `OfflineBanner` và `utils/retryQueue.js`, nên mất mạng giữa chừng là tình huống có thật,
+   không phải giả định.
 3. **Every action gets immediate visible feedback**; every wait gets a progress indicator.
    No response reads as broken, and the user clicks again.
 4. **Every error, empty, and loading state offers a next action.** Never a dead end.
@@ -48,16 +55,21 @@ specifics, and needs memorability above all.
     what can I do now. A page absent from breadcrumb and nav is how users get lost.
 11. **Convention over invention** (Jakob's Law — users spend most of their time on other
     sites). Novel navigation is a cost paid by every user; justify it or drop it.
-12. **Constrain student input, not teacher input.** Constraints prevent errors, but too many
-    make a frequent user slow — experts prefer typing to clicking.
+12. **Ràng buộc chặt ô tiền và ô điểm, nới ô admin nhập nhanh.** Ràng buộc ngăn lỗi, nhưng
+    quá nhiều ràng buộc làm người dùng thường xuyên chậm đi — chuyên gia thích gõ hơn click.
+    Ô số tiền và ô điểm phải chặn giá trị không hợp lệ ngay khi gõ; ô tìm kiếm và ô lọc của
+    admin thì đừng bắt click qua nhiều bước.
 13. **Every visual difference is read as meaning.** An unexplained variation in font, colour,
     weight, or spacing will be assigned significance by users. Vary only on purpose.
+14. **Mọi con số tổng phải truy ngược được về dòng chi tiết.** Admin không tin một con số tiền
+    không giải thích được. Mỗi tổng ở `FeesPage`, `PayrollTab` và các card `ReportsPage` phải
+    mở ra được danh sách dòng đã cộng thành nó.
 
 ## Review checklist
 
 - [ ] Named the user and optimised the dimension that matters for them
 - [ ] A first-time user can proceed without instructions
-- [ ] Hard rules 1–13 above all hold
+- [ ] Hard rules 1–14 above all hold
 - [ ] Grouping done with **whitespace and proximity** before borders (Gestalt)
 - [ ] Ran the screen against Nielsen's ten (`references/evaluation.md`) — twice, overview
       then detail — logging each issue as `[heuristic] [severity 0-4] [fix difficulty]`
@@ -70,7 +82,9 @@ specifics, and needs memorability above all.
 - [ ] Text is scannable — keywords, lists, one idea per block; links front-load the keyword
 - [ ] Labels use the user's words, in both EN and VI
 - [ ] Asked Apple's four: what's good, what's bad, **what's missing, what's superfluous?**
-- [ ] (`CLAUDE.md`) theme tokens, component classes, lucide icons, skeletons, 375/768/1280px
+- [ ] (`CLAUDE.md`) navy tokens không hard-code hex, dùng component từ `@/components/ui`,
+      icon lucide, `clsx` không template literal, `Skeleton` khi loading, `Empty` khi rỗng,
+      toast sau mọi action, kiểm tra 1280/768/375px
 
 ## Depth
 

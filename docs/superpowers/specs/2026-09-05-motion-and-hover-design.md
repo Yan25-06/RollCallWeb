@@ -103,9 +103,16 @@ Vấn đề không phải thiếu hiệu ứng, mà là hiệu ứng đang **nó
 
 ### a) `.card` hứa hẹn sai — false affordance
 
-`.card` có `hover:shadow-navy`, và `.stat-card` kế thừa (`@apply card p-5 ...`). Nên bốn thẻ
-thống kê ở Dashboard nhấc bóng khi rê chuột dù phần lớn không bấm được: trông bấm được, bấm
-thì không có gì.
+`.card` có `hover:shadow-navy`, và `.stat-card` kế thừa (`@apply card p-5 ...`). Nên **mọi**
+thẻ thống kê nhấc bóng khi rê chuột, kể cả thẻ không bấm được: trông bấm được, bấm thì không
+có gì.
+
+Kiểm đếm thực tế trong repo — 12 `StatCard`, chia hai nhóm:
+
+- **4 thẻ bấm được** (`DashboardPage.jsx:128,138,148,158`) — không phải qua prop, mà bọc
+  ngoài bằng `<div className="cursor-pointer" onClick={...}>`.
+- **8 thẻ không bấm được** (`FeesPage.jsx:150,156,162,169` và `AdminPanelPage.jsx:189,195,201,207`)
+  — đây mới là chỗ hiệu ứng nói dối.
 
 Tách làm hai class:
 
@@ -115,8 +122,13 @@ Tách làm hai class:
 Component `Card` (`src/components/ui/index.jsx`) gắn `card-interactive` **khi và chỉ khi** có
 prop `onClick` — cùng điều kiện đã dùng cho `cursor-pointer`.
 
-Kiểm tra sau khi đổi: các `StatCard` có `onClick` (Dashboard "Chưa đóng phí" → FeesPage) vẫn
-phải nhấc lên; các thẻ không có thì đứng yên.
+`StatCard` **hiện không nhận `onClick`** (signature: `{ label, value, sub, icon, accent, className }`),
+nên quy tắc theo prop của `Card` không tự áp dụng được cho nó. Thêm prop `onClick` cho
+`StatCard`: có thì render `card-interactive` + `cursor-pointer`, không có thì `.stat-card`
+tĩnh. Rồi bỏ 4 div bọc ngoài ở `DashboardPage` và truyền `onClick` thẳng vào `StatCard` —
+vừa sửa được affordance, vừa bỏ một lớp div thừa.
+
+Kết quả mong đợi sau khi đổi: 4 thẻ Dashboard vẫn nhấc lên, 8 thẻ ở Học phí và Admin đứng yên.
 
 ### b) Chỉ `.btn` có phản hồi khi nhấn
 
